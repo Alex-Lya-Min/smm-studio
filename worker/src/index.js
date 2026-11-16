@@ -226,6 +226,12 @@ const CAROUSEL_EXAMPLE = `# Solar AI Firewall
 ! При блокирующей политике останавливает обнаруженную атаку
 @art: a stack of floating translucent dark glass document sheets with faint lines, one sheet glowing warm orange
 ===
+# Результат
+По итогам пилота «Инфосистемы Джет» рекомендовала Solar SIEM для использования в клиентских проектах.
+
+" «В Solar SIEM мы увидели возможность предложить единый подход к мониторингу событий и автоматизации реагирования. Результаты пилотирования подтвердили целесообразность использования решения в проектах клиентов».
+— Александр Мещеряков | директор департамента внедрения систем мониторинга ИБ «Инфосистемы Джет»
+===
 # Контроль использования ИИ
 ## Устанавливайте лимиты
 + на запросы | на токены | на бюджет
@@ -250,6 +256,8 @@ plain lines       a paragraph; consecutive lines form one paragraph. Wrap 1-5 ke
 | text            glass card for an example, a conclusion or an important note (1-2 sentences)
 ! text            warning card with a triangle icon (one short sentence); only on a slide that also has @art
 + a | b | c       a row of 2-4 chips, 1-3 words each
+" text            a quote with big orange quote marks (keep the quote verbatim, with its «»); consecutive " lines = one quote
+— Name | role     the quote's author, on the line right after the quote (name, then | , then position and company)
 @art: prompt      a 3D illustration in the lower right of the slide; on the cover it is the full background image
 
 DESIGN RULES
@@ -259,6 +267,12 @@ DESIGN RULES
   from slide to slide (cards, lists, chips, label pills, accent headings).
 - Use @art on at most 2 slides after the cover; keep text on those slides short, because the image takes the lower right.
 - The last slide sums up or gives a call to action.
+- The brief is often a document from a colleague, sometimes already split into cards or slides
+  ("Карточка 1", "Слайд 2", numbered sections). Then follow that split and order, and keep the wording:
+  move the approved text into the markup almost verbatim, only shorten where it would not fit a slide.
+  Ignore service notes in the brief (deadlines, comments to the designer, links), but if it describes a picture
+  for a slide, use that for the slide's @art prompt.
+- When the brief has a quote of a person, put it on its own slide with the " and — elements, verbatim.
 - Write in the language of the brief. Use ONLY facts from the brief: never invent numbers, features, customer names,
   certifications, prices or dates. If the brief is thin, make fewer slides instead of padding.
 - No emoji and no hashtags on slides.
@@ -277,15 +291,25 @@ ${CAROUSEL_EXAMPLE}
 Solar AI Firewall помогает компаниям безопасно работать с нейросетями: правила для сотрудников, маскирование данных и защита от подмены инструкций. #ИИ #кибербезопасность`;
 
 async function claudeSlides(env, input) {
-  const user = [
-    input.slides ? `Slides: exactly ${input.slides}, including the cover` : "Slides: 5-7 including the cover, fewer if the brief is short",
-    input.title ? `Product or topic for the cover: ${input.title}` : "",
-    `Brief:\n${input.brief}`,
-  ].filter(Boolean).join("\n");
-  const text = (await claude(env, SLIDES_SYSTEM, user, 3000)).replace(/^\s*```[a-z]*\s*|\s*```\s*$/g, "");
+  const user = input.instruction
+    ? [
+        "Here is the current carousel markup. Change it according to the editor's request and keep everything else",
+        "exactly as it is (same slides, wording and @art prompts unless the request is about them).",
+        `Editor's request: ${input.instruction}`,
+        `Current markup:\n${input.markup}`,
+        `Original brief (for facts only):\n${input.brief || "(none)"}`,
+      ].join("\n")
+    : [
+        input.slides
+          ? `Slides: exactly ${input.slides}, including the cover`
+          : "Slides: if the brief is already split into cards or slides, as many as it has (max 10); otherwise 5-7 including the cover, fewer if the brief is short",
+        input.title ? `Product or topic for the cover: ${input.title}` : "",
+        `Brief:\n${input.brief}`,
+      ].filter(Boolean).join("\n");
+  const text = (await claude(env, SLIDES_SYSTEM, user, 4500)).replace(/^\s*```[a-z]*\s*|\s*```\s*$/g, "");
   const [markup, caption = ""] = text.split(/^\s*-{3}CAPTION-{3}\s*$/m);
   if (!/^#\s*\S/m.test(markup || "")) throw new HttpError(502, "Claude вернул неожиданный ответ — попробуйте ещё раз");
-  return { markup: clip(markup, 12000), caption: clip(caption, 1500) };
+  return { markup: clip(markup, 15000), caption: clip(caption, 1500) };
 }
 
 // ----------------------------------------------------------------------------- Krea
@@ -400,15 +424,20 @@ async function route(request, env) {
 
   if (path === "/api/slides" && request.method === "POST") {
     const body = await readJson(request);
-    const brief = clip(body.brief, 4000);
-    if (brief.length < 20) throw new HttpError(400, "Опишите, о чём карусель — хотя бы пару предложений");
+    const brief = clip(body.brief, 15000);
+    const instruction = clip(body.instruction, 1000);
+    const markup = clip(body.markup, 15000);
+    if (instruction && markup.length < 10) throw new HttpError(400, "Сначала соберите карусель, потом её можно поправить");
+    if (!instruction && brief.length < 20) throw new HttpError(400, "Вставьте бриф — хотя бы пару предложений");
     const quota = await me.consume("plan", day, user.limit * 3);
     if (!quota.ok) throw new HttpError(429, "На сегодня лимит запросов исчерпан");
     const n = Number(body.slides) || 0;
     const result = await claudeSlides(env, {
       brief,
       title: clip(body.title, 120),
-      slides: n ? Math.min(8, Math.max(3, n)) : 0,
+      slides: n ? Math.min(10, Math.max(3, n)) : 0,
+      instruction,
+      markup,
     });
     return json(result);
   }

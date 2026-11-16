@@ -75,6 +75,7 @@ font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;c
 .chip .full{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mode{margin:0 0 22px}.mode button{padding:10px 6px;font-size:14px;font-weight:600}
 .markup{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.55;min-height:380px!important;white-space:pre-wrap;overflow-wrap:anywhere;tab-size:2}
+.manual{margin:26px 0 0;border-top:1px solid var(--line);padding-top:16px}.manual>summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--muted)}.manual[open]>summary{color:var(--text)}
 .cheat{margin:8px 0 0;font-size:12px;color:var(--muted)}.cheat summary{cursor:pointer;color:var(--text);font-weight:600}
 .cheat dl{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;margin:10px 0 0}.cheat dt{font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--accent2);white-space:nowrap}.cheat dd{margin:0}
 .seg.slides button{padding:8px 4px}
@@ -148,9 +149,10 @@ font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;c
 
   <div id="carouselForm" hidden>
   <div class="step">
-    <h2 class="stepTitle"><span>1</span>О чём карусель</h2>
-    <div class="field"><label for="cTitle">Продукт или тема <small>для обложки, необязательно</small></label><input class="input" id="cTitle" maxlength="120" placeholder="Например: Solar AI Firewall"></div>
-    <div class="field"><label for="cBrief">Бриф</label><textarea class="input" id="cBrief" maxlength="4000" style="min-height:150px" placeholder="Что за продукт, для кого, какие 3–5 главных мыслей, какие факты обязательно упомянуть">Solar AI Firewall — защита данных и контроль работы сотрудников с внешними и внутренними ИИ-сервисами. Задаёт правила для сотрудников, подразделений и приложений. Выявляет чувствительные данные в запросах и ответах (персональные данные, реквизиты, ключи доступа), маскирует их или блокирует передачу. Выявляет попытки подмены инструкций. Позволяет ставить лимиты на запросы, токены и бюджет, передаёт события в SIEM и SOAR.</textarea><p class="help">AI разложит текст по слайдам и не добавит фактов, которых здесь нет.</p></div>
+    <h2 class="stepTitle"><span>1</span>Бриф</h2>
+    <div class="field"><textarea class="input" id="cBrief" maxlength="15000" style="min-height:240px" aria-label="Бриф" placeholder="Вставьте текст из документа целиком, как есть: с карточками, цитатами и пометками"></textarea>
+    <p class="help">AI сам разобьёт текст на слайды и подберёт макеты, фактов от себя не добавит. Если в брифе уже есть карточки или цитаты, порядок и формулировки сохранятся.</p></div>
+    <div class="field"><label for="cTitle">Продукт или тема для обложки <small>необязательно</small></label><input class="input" id="cTitle" maxlength="120" placeholder="Например: Solar AI Firewall"></div>
   </div>
   <div class="step">
     <h2 class="stepTitle"><span>2</span>Сколько слайдов</h2>
@@ -166,10 +168,16 @@ font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;c
   </div>
   <button id="cGenerate" class="btn wide">Собрать карусель</button>
   <p class="cost" id="cHint"></p>
-  <div class="step" style="margin-top:26px">
-    <h2 class="stepTitle"><span>3</span>Текст слайдов</h2>
-    <div class="field"><textarea class="input markup" id="cMarkup" spellcheck="false" aria-label="Разметка слайдов"></textarea>
-    <p class="help">Правки сразу видны на слайдах. Сюда же попадает текст от AI — его можно дописать или сократить.</p>
+  <div class="step" id="cFixStep" style="margin-top:26px" hidden>
+    <h2 class="stepTitle"><span>3</span>Поправить</h2>
+    <div class="field"><textarea class="input" id="cFix" maxlength="1000" style="min-height:84px" aria-label="Что поправить" placeholder="Например: сократи третий слайд; на последнем добавь призыв написать нам; цитату вынеси на отдельный слайд"></textarea>
+    <p class="help">AI перепишет только то, что вы попросили. Картинки останутся, а заново нарисовать можно кнопкой «↻ Картинка» на слайде.</p></div>
+    <button id="cFixBtn" class="btn alt wide">Поправить</button>
+  </div>
+  <details class="manual" id="cManual">
+    <summary>Править текст слайдов вручную</summary>
+    <div class="field" style="margin-top:12px"><textarea class="input markup" id="cMarkup" spellcheck="false" aria-label="Разметка слайдов"></textarea>
+    <p class="help">Для точечных правок: опечатка, слово, порядок пунктов. Изменения сразу видны на слайдах.</p>
     <details class="cheat"><summary>Как размечать</summary><dl>
       <dt>===</dt><dd>новый слайд (первый — обложка)</dd>
       <dt># текст</dt><dd>заголовок; две строки с # — перенос</dd>
@@ -181,10 +189,12 @@ font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;c
       <dt>| текст</dt><dd>стеклянная карточка</dd>
       <dt>! текст</dt><dd>предупреждение с треугольником</dd>
       <dt>+ а | б | в</dt><dd>ряд плашек с галочками</dd>
+      <dt>" текст</dt><dd>цитата с большими кавычками</dd>
+      <dt>— Имя | должность</dt><dd>автор цитаты, сразу после неё</dd>
       <dt>@art: …</dt><dd>3D-картинка справа снизу (на обложке — фон); описание по-английски</dd>
       <dt>пустая строка</dt><dd>новый абзац</dd>
     </dl></details></div>
-  </div>
+  </details>
   </div>
 </section>
 
@@ -364,12 +374,14 @@ function carStatus(){
   const busy=car.images.filter(x=>x&&x.running).length,err=car.images.filter(x=>x&&x.error).length,n=car.slides.length;
   const word=n%10===1&&n%100!==11?'слайд':n%10>=2&&n%10<=4&&(n%100<12||n%100>14)?'слайда':'слайдов';
   const text=car.err||(!n?'Нет слайдов':busy?('Рисуем картинки… осталось '+busy):(n+' '+word+(car.sample?' · пример из макетов':'')+(err?' · картинка не получилась: '+err:'')));
+  $('cFixStep').hidden=!(accessKey&&me&&n);
   if($('mode').value!=='carousel')return;
   $('status').textContent=text;$('downloadAll').disabled=!n||busy>0;$('cGenerate').disabled=busy>0;
 }
 function carHint(){
   const on=!!(accessKey&&me);
-  $('cHint').textContent=on?('AI напишет текст слайдов и нарисует обложку и 1–2 иллюстрации: спишется до 3 из '+me.remaining+' генераций'):'Демо: пример из макетов, без AI. Текст слайдов можно править вручную';
+  $('cHint').textContent=on?('AI разложит бриф по слайдам и нарисует обложку и 1–2 иллюстрации: спишется до 3 из '+me.remaining+' генераций'):'Демо: пример из макетов, без AI. Чтобы собирать карусели из брифа, войдите по ключу';
+  carStatus();
 }
 async function carImage(i){
   const s=car.slides[i];if(!hasImage(s))return;
@@ -388,18 +400,38 @@ async function carGenerate(){
     if(!$('cMarkup').value.trim())$('cMarkup').value=Carousel.DEMO;
     car.images=[];carParse();car.err='';$('status').textContent='Демо: AI не подключён. Войдите по ключу, чтобы карусель собиралась по брифу';return;
   }
-  $('cGenerate').disabled=true;car.err='';$('status').textContent='Раскладываем бриф на слайды…';
+  $('cGenerate').disabled=true;$('cFixBtn').disabled=true;car.err='';$('status').textContent='Раскладываем бриф на слайды…';
   let res;
   try{res=await api('/api/slides',{brief:$('cBrief').value,title:$('cTitle').value,slides:Number($('cSlides').value)})}
-  catch(e){car.err='✕ '+e.message;carStatus();$('cGenerate').disabled=false;return}
+  catch(e){car.err='✕ '+e.message;carStatus();$('cGenerate').disabled=false;$('cFixBtn').disabled=false;return}
   $('cMarkup').value=res.markup.trim();try{localStorage.setItem(CAR_STORE,$('cMarkup').value)}catch{}
   car.caption=res.caption||'';showCaption();car.sample=false;car.images=[];
   car.slides=Carousel.parse($('cMarkup').value);
   const want=car.slides.map((s,i)=>hasImage(s)?i:-1).filter(i=>i>=0).slice(0,Math.min(3,me.remaining));
   want.forEach(i=>{car.images[i]={img:null,busy:'Ждём очереди…'}});
-  carBuild();carStatus();
+  carBuild();$('cFixBtn').disabled=false;carStatus();
   want.forEach((i,k)=>setTimeout(()=>carImage(i),k*400));
 }
+// Правка готовой карусели словами: AI переписывает разметку, картинки переносим на те же слайды
+async function carFix(){
+  const instruction=$('cFix').value.trim();if(!instruction){$('cFix').focus();return}
+  $('cFixBtn').disabled=true;$('cGenerate').disabled=true;car.err='';$('status').textContent='Правим карусель…';
+  let res;
+  try{res=await api('/api/slides',{instruction,markup:$('cMarkup').value,brief:$('cBrief').value})}
+  catch(e){car.err='✕ '+e.message;$('cFixBtn').disabled=false;carStatus();return}
+  const old=car.slides,oldImgs=car.images,hadAi=oldImgs.some(Boolean);
+  $('cMarkup').value=res.markup.trim();try{localStorage.setItem(CAR_STORE,$('cMarkup').value)}catch{}
+  if(res.caption){car.caption=res.caption;showCaption()}
+  const next=Carousel.parse($('cMarkup').value),imgs=[];
+  next.forEach((s,i)=>{if(!hasImage(s))return;let j=old.findIndex(o=>hasImage(o)&&o.cover===s.cover&&o.art===s.art);if(j<0&&hasImage(old[i])&&old[i].cover===s.cover)j=i;if(j>=0&&oldImgs[j])imgs[i]=oldImgs[j]});
+  // Новым слайдам с картинкой дорисовываем свою, если карусель уже была с AI-картинками
+  const missing=hadAi?next.map((s,i)=>hasImage(s)&&!imgs[i]?i:-1).filter(i=>i>=0).slice(0,me?me.remaining:0):[];
+  missing.forEach(i=>{imgs[i]={img:null,busy:'Ждём очереди…'}});
+  car.images=imgs;car.sample=false;car.slides=next;carBuild();
+  $('cFix').value='';$('cFixBtn').disabled=false;carStatus();
+  missing.forEach((i,k)=>setTimeout(()=>carImage(i),k*400));
+}
+$('cFixBtn').addEventListener('click',carFix);
 $('cGenerate').addEventListener('click',carGenerate);
 // ---------------------------------------------------------------- переключение «Пост / Карусель»
 let postCaption='';
