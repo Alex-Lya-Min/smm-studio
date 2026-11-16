@@ -140,8 +140,8 @@ black graphite, warm orange light, calm and premium. Text is typeset later by co
 You get a post brief, the headline, the layout and the format.
 Return ONLY a JSON object: {"prompts": ["...", ...], "caption": "..."}.
 - "prompts": exactly N distinct prompts in English, 30-60 words each, each a different visual metaphor of the brief.
-  Layout "cover": a close-up cinematic scene that fills the frame, the hero object in the lower right part,
-    the top third of the frame dark and calm for the headline.
+  Layout "cover": a close-up cinematic scene, the hero object in the lower half of the frame, slightly right of center;
+    the whole upper half of the frame is empty dark background for the headline.
   Layouts "art" and "card": ONE isolated hero object or a small group, centered with generous empty margins
     on a plain flat dark charcoal background, no floor, no other elements.
   Every prompt MUST end with: "${NO_TEXT}, no screens with readable UI, no people".
@@ -196,7 +196,7 @@ const CAROUSEL_EXAMPLE = `# Solar AI Firewall
 > Нейросети — под контролем
 *Защита данных и контроль работы*
 с внешними и внутренними ИИ-сервисами
-@art: a single glowing orange translucent glass keyboard key rising from a row of matte black keys, warm light inside, macro shot, the top third of the frame dark and empty
+@art: a single glowing orange translucent glass keyboard key rising from a row of matte black keys, warm light inside, macro shot, the object in the lower half of the frame, the upper half empty dark background
 ===
 # Единые правила работы с ИИ
 > Задавайте правила для сотрудников, подразделений и приложений.
@@ -279,8 +279,8 @@ DESIGN RULES
 
 @art PROMPTS (English, 25-50 words): one hero object or a small group that is a visual metaphor of the slide, cinematic 3D
 render, translucent orange glass and matte black graphite materials, warm glowing orange light, isolated on a plain flat
-dark background, no text. For the cover: a close-up scene that fills the frame, the hero object in the lower right part,
-the top third of the frame dark and calm.
+dark background, no text. For the cover: a close-up scene, the hero object in the lower half of the frame, slightly right
+of center; the whole upper half of the frame is empty dark background, because the title and lead are set there.
 
 OUTPUT: the markup, then a line with exactly ---CAPTION--- , then a caption for the whole carousel
 (2-4 sentences and up to 3 hashtags, same language, only facts from the brief). No code fences, nothing else.
@@ -329,7 +329,8 @@ const STYLES = {
     refs: (env) => refList(env.CAROUSEL_COVER_REFS),
     look:
       "cinematic close-up 3D render, matte black and translucent glowing orange glass, dark charcoal background (#1b1e23), " +
-      "shallow depth of field. Keep the top third of the frame dark and calm.",
+      "shallow depth of field. Composition: the hero object sits in the LOWER half of the frame, slightly right of center; " +
+      "the whole upper half of the frame is empty dark background with nothing in it (text goes there).",
   },
   art: {
     refs: (env) => refList(env.CAROUSEL_ART_REFS),

@@ -334,18 +334,20 @@
   }
 
   // ------------------------------------------------------------------ картинки
-  function drawCoverImage(c, img) {
+  // Обложка: картинку опускаем ниже текста (чем длиннее текст, тем ниже), верх плавно уходит в фон
+  function drawCoverImage(c, img, textBottom) {
+    const shift = Math.max(0, Math.min(textBottom - H * 0.3, H * 0.35));
     if (img && img.width) {
       const sc = Math.max(W / img.width, H / img.height), w = img.width * sc, h = img.height * sc;
-      c.drawImage(img, (W - w) / 2, (H - h) / 2, w, h);
+      c.drawImage(img, (W - w) / 2, (H - h) / 2 + shift, w, h);
       c.save(); c.globalCompositeOperation = 'screen'; c.globalAlpha = 0.6; c.fillStyle = BG; c.fillRect(0, 0, W, H); c.restore();
     } else {
       const g = c.createRadialGradient(W * 0.65, H * 0.7, 20, W * 0.65, H * 0.7, Math.min(W, H) * 0.48);
       g.addColorStop(0, 'rgba(254,110,54,.35)'); g.addColorStop(1, 'rgba(254,110,54,0)');
       c.fillStyle = g; c.fillRect(0, 0, W, H);
     }
-    const gh = TOP + 330, g = c.createLinearGradient(0, 0, 0, gh);
-    g.addColorStop(0, BG); g.addColorStop(TOP / gh, BG); g.addColorStop(1, 'rgba(27,30,35,0)');
+    const solid = Math.max(TOP, textBottom - 110), gh = Math.max(TOP + 330, textBottom + 150), g = c.createLinearGradient(0, 0, 0, gh);
+    g.addColorStop(0, BG); g.addColorStop(solid / gh, BG); g.addColorStop(1, 'rgba(27,30,35,0)');
     c.fillStyle = g; c.fillRect(0, 0, W, gh);
   }
   // Иллюстрация справа снизу: прозрачный PNG ставим как есть, сгенерированную картинку растворяем по краям в фон
@@ -396,7 +398,12 @@
     c.fillStyle = BG; c.fillRect(0, 0, W, H);
     if (!s) return;
     const L = fit(c, s), k = L.k;
-    if (s.cover) drawCoverImage(c, opt.image);
+    let lead = null;
+    if (s.cover) {
+      const text = s.blocks.filter((b) => b.text).map((b) => b.text).join('\n');
+      if (text) lead = wrapRich(c, text, sans(35 * k), Math.min(640, FW));
+      drawCoverImage(c, opt.image, lead ? L.head.bottom + 60 * k + lead.length * 42 * k : L.head.bottom);
+    }
     else if (s.hasArt) {
       const wideBottom = L.items.filter((it) => !it.narrow && it.b.type !== 'warn').reduce((a, it) => Math.max(a, it.y + it.h), 0);
       drawArt(c, opt.image, wideBottom - 40);
@@ -411,8 +418,7 @@
 
     if (s.cover) {
       // Обложка: под шапкой — лид, первая строка обычно оранжевая
-      const text = s.blocks.filter((b) => b.text).map((b) => b.text).join('\n');
-      if (text) { const lh = 42 * k, lines = wrapRich(c, text, sans(35 * k), Math.min(640, FW)); drawLines(c, lines, sans(35 * k), M, head.bottom + 60 * k, lh, '#fff'); }
+      if (lead) drawLines(c, lead, sans(35 * k), M, head.bottom + 60 * k, 42 * k, '#fff');
     } else {
       for (const it of L.items) BLOCKS[it.b.type].draw(c, it.b, it, M, it.y, k, snap);
     }
