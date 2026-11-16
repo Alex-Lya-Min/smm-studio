@@ -135,20 +135,17 @@ async function upstreamReason(r) {
 // ----------------------------------------------------------------------------- Claude
 
 const PLAN_SYSTEM = `You are the art director of the dark social media style of Solar, a cybersecurity company.
-The brand look: near-black background (#0E0E0E), cinematic 3D renders of abstract technology objects (cubes, chips,
-server blocks, boxes, shields, data streams, globes) made of matte graphite and warm orange materials, glowing orange
-#FE6E36 light accents, soft volumetric light, subtle film grain, lots of empty black space. Isometric or 3/4 view.
-You get a post brief, the headline that will be typeset on the image, the layout and the format.
-Write prompts for an image model that will generate ONLY the BACKGROUND render. Text is added later by code.
+The look: dark charcoal background (#1b1e23), cinematic 3D renders made of translucent glowing orange glass and matte
+black graphite, warm orange light, calm and premium. Text is typeset later by code, the image model makes only the picture.
+You get a post brief, the headline, the layout and the format.
 Return ONLY a JSON object: {"prompts": ["...", ...], "caption": "..."}.
-- "prompts": exactly N distinct prompts in English, 40–80 words each: one clear hero object or small group that is
-  a visual metaphor of the brief, materials, light, camera angle. Make the variants different metaphors.
-  Respect the empty zone required by the layout:
-    "cover" — headline sits in the TOP 40% of the frame: keep the top 40% pure black and empty, objects in the lower part;
-    "caps"  — headline sits in the BOTTOM 30%: keep the bottom 30% dark and empty, objects in the upper and middle part;
-    "card"  — text blocks fill the TOP-LEFT half: keep the top half dark and calm, objects in the lower right.
+- "prompts": exactly N distinct prompts in English, 30-60 words each, each a different visual metaphor of the brief.
+  Layout "cover": a close-up cinematic scene that fills the frame, the hero object in the lower right part,
+    the top third of the frame dark and calm for the headline.
+  Layouts "art" and "card": ONE isolated hero object or a small group, centered with generous empty margins
+    on a plain flat dark charcoal background, no floor, no other elements.
   Every prompt MUST end with: "${NO_TEXT}, no screens with readable UI, no people".
-- "caption": a short social media caption (1–3 sentences) in the same language as the brief, based ONLY on the brief.
+- "caption": a short social media caption (1-3 sentences) in the same language as the brief, based ONLY on the brief.
   Do not invent facts, numbers, names or dates.`;
 
 async function claude(env, system, user, maxTokens) {
@@ -297,17 +294,13 @@ function kreaBase(env) {
   return env.KREA_API_BASE || "https://api.krea.ai";
 }
 
-// Референсы стиля (рендеры из Figma), через запятую: STYLE_REFS — посты, CAROUSEL_COVER_REFS / CAROUSEL_ART_REFS — карусели
+// Референсы стиля (рендеры из Figma), через запятую: CAROUSEL_COVER_REFS — обложки, CAROUSEL_ART_REFS — 3D-иллюстрации
 function refList(value) {
   return (value || "").split(",").map((s) => s.trim()).filter((s) => /^https:\/\//.test(s)).slice(0, 4);
 }
 
 // look — описание стиля; с референсами оно идёт как «повтори стиль, но не объекты», без них — просто как стиль
 const STYLES = {
-  post: {
-    refs: (env) => refList(env.STYLE_REFS),
-    look: "matte graphite and warm orange materials, glowing orange accents, near-black background, soft cinematic light and grain.",
-  },
   cover: {
     refs: (env) => refList(env.CAROUSEL_COVER_REFS),
     look:
@@ -322,8 +315,8 @@ const STYLES = {
   },
 };
 
-async function kreaStart(env, prompt, format, style = "post") {
-  const st = STYLES[style] || STYLES.post;
+async function kreaStart(env, prompt, format, style = "art") {
+  const st = STYLES[style] || STYLES.art;
   const refs = st.refs(env);
   const body = { prompt, aspect_ratio: ASPECT[format] || "1:1", resolution: env.KREA_RESOLUTION || "1K" };
   if (refs.length) {
@@ -331,7 +324,7 @@ async function kreaStart(env, prompt, format, style = "post") {
     body.prompt =
       "Use the reference images ONLY as a style guide: the same rendering quality, " + st.look +
       " Do NOT copy their objects or composition — create a new scene: " + prompt;
-  } else if (style !== "post") {
+  } else {
     body.prompt = "Style: " + st.look + " Scene: " + prompt;
   }
   const send = (b) =>
@@ -397,7 +390,7 @@ async function route(request, env) {
     const input = {
       count: Math.min(5, Math.max(1, Number(body.count) || 1)),
       format: ASPECT[body.format] ? body.format : "square",
-      template: ["cover", "caps", "card"].includes(body.template) ? body.template : "cover",
+      template: ["cover", "art", "card"].includes(body.template) ? body.template : "cover",
       headline: clip(body.headline, 120),
       brief: clip(body.brief, 2000),
     };
@@ -422,7 +415,7 @@ async function route(request, env) {
 
   if (path === "/api/background" && request.method === "POST") {
     const body = await readJson(request);
-    const style = STYLES[body.style] ? body.style : "post";
+    const style = STYLES[body.style] ? body.style : "art";
     let prompt = clip(body.prompt, 1500);
     if (prompt.length < 10) throw new HttpError(400, "Пустой промпт");
     if (!prompt.toLowerCase().includes("no text")) prompt += `, ${NO_TEXT}`;

@@ -38,13 +38,13 @@ font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;c
 .layouts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .lay{background:var(--panel2);border:1px solid var(--line2);border-radius:10px;padding:8px;text-align:left;display:flex;flex-direction:column;gap:7px;font-size:12px;line-height:1.25;color:var(--muted)}
 .lay[aria-pressed=true]{border-color:var(--accent);color:var(--text);box-shadow:0 0 0 1px var(--accent) inset}
-.thumb{aspect-ratio:1;border-radius:6px;background:radial-gradient(60% 50% at 70% 80%,#7a3418 0,#2a1208 45%,#0b0b0c 75%);position:relative;overflow:hidden}
-.thumb::before{content:"";position:absolute;left:9%;top:9%;width:30%;height:6%;border-radius:2px;background:var(--accent)}
-.thumb b{position:absolute;left:9%;height:7%;border-radius:2px;background:#fff}
-.thumb.cover b:nth-child(1){top:24%;width:78%}.thumb.cover b:nth-child(2){top:35%;width:55%}
-.thumb.caps{background:radial-gradient(60% 50% at 65% 35%,#7a3418 0,#2a1208 45%,#0b0b0c 75%)}.thumb.caps b{height:9%}.thumb.caps b:nth-child(1){bottom:24%;width:70%}.thumb.caps b:nth-child(2){bottom:11%;width:50%}
-.thumb.card::before{display:none}.thumb.card b{left:16%;height:5%}.thumb.card b:nth-child(1){top:10%;width:26%;background:var(--accent)}.thumb.card b:nth-child(2){top:20%;width:66%;opacity:.8}.thumb.card b:nth-child(3){top:38%;width:26%;background:var(--accent)}.thumb.card b:nth-child(4){top:48%;width:58%;opacity:.8}
-.thumb.card i{position:absolute;left:8%;width:2%;background:#bbb;top:10%;height:15%}.thumb.card i+i{top:38%}
+.thumb{aspect-ratio:1;border-radius:6px;background:#1b1e23;position:relative;overflow:hidden}
+.thumb b{position:absolute;left:8%;height:6%;border-radius:2px;background:#fff}
+.thumb b:nth-child(1){top:8%;width:62%}.thumb b:nth-child(2){top:19%;width:44%;opacity:.55;height:4%}.thumb b:nth-child(3){top:30%;width:40%;height:4%;background:var(--accent)}
+.thumb.cover{background:radial-gradient(55% 45% at 62% 72%,#b4521f 0,#4a2412 40%,#1b1e23 75%)}
+.thumb.art i{position:absolute;right:12%;bottom:12%;width:34%;height:34%;border-radius:6px;transform:rotate(45deg);background:linear-gradient(135deg,#ff9a66,#c4471a);opacity:.9}
+.thumb.card b:nth-child(3){font:0/0 a;height:5%;width:30%;top:33%}
+.thumb.card i{position:absolute;left:8%;right:8%;height:14%;border-radius:3px;background:rgba(150,145,145,.28);top:43%}.thumb.card i+i{top:62%}
 /* сегменты */
 .seg{display:flex;background:#0c0d10;border:1px solid var(--line2);border-radius:10px;padding:3px;gap:3px}
 .seg button{flex:1;background:none;border:0;border-radius:7px;padding:8px 6px;font-size:13px;color:var(--muted);white-space:nowrap}
@@ -91,7 +91,7 @@ font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;c
 </header>
 
 <section class="login" id="keyForm">
-  <p><b>Демо-режим.</b> Фон берётся из готовых рендеров. Чтобы AI рисовал новые фоны, откройте персональную ссылку или вставьте ключ доступа.</p>
+  <p><b>Демо-режим.</b> Картинки берутся из готовых рендеров. Чтобы AI рисовал новые, откройте персональную ссылку или вставьте ключ доступа.</p>
   <form onsubmit="return false"><input class="input" id="accessKey" type="password" autocomplete="off" placeholder="Ключ доступа" aria-label="Ключ доступа"><button type="submit" class="btn alt" id="saveKey">Войти</button></form>
   <p class="msg" id="apiStatus" role="status" aria-live="polite"></p>
 </section>
@@ -107,18 +107,17 @@ font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;c
   <div id="postForm">
   <div class="step">
     <h2 class="stepTitle"><span>1</span>Текст</h2>
-    <div class="field"><label for="headline">Заголовок на картинке <small id="headCount"></small></label><input class="input" id="headline" maxlength="100" value="Данные под защитой" placeholder="Например: Данные под защитой"></div>
-    <div class="field" id="cardField" hidden><label for="cardText">Текст на карточке</label><textarea class="input" id="cardText" maxlength="1200" placeholder="Ситуация: что произошло&#10;&#10;Решение: как помогает продукт">Ситуация: Нейросеть присылает документ со скрытым вредоносным макросом.
-
-Решение: Solar webProxy проверяет файлы и блокирует опасные ответы нейросети.</textarea><p class="help">Каждый блок с новой строки: «Подзаголовок: текст». До трёх блоков.</p></div>
-    <div class="field"><label for="brief">О чём пост</label><textarea class="input" id="brief" maxlength="2000" placeholder="Тема, продукт, главная мысль">Представляем новые возможности защиты корпоративных данных. Технологии, которые помогают видеть больше и реагировать быстрее.</textarea><p class="help">По этому тексту AI подберёт фон и напишет подпись к посту. На картинку он не попадает.</p></div>
+    <div class="field"><label for="headline">Заголовок <small id="headCount"></small></label><input class="input" id="headline" maxlength="100" value="Solar AI Firewall" placeholder="Например: Solar AI Firewall"></div>
+    <div class="field"><label for="subtitle">Подзаголовок <small>необязательно</small></label><input class="input" id="subtitle" maxlength="120" value="Нейросети — под контролем" placeholder="Короткая мысль под заголовком"></div>
+    <div class="field"><label for="cardText" id="cardLabel">Лид</label><textarea class="input" id="cardText" maxlength="1200"></textarea><p class="help" id="cardHelp"></p></div>
+    <div class="field"><label for="brief">О чём пост</label><textarea class="input" id="brief" maxlength="2000" placeholder="Тема, продукт, главная мысль">Solar AI Firewall — защита данных и контроль работы сотрудников с внешними и внутренними ИИ-сервисами.</textarea><p class="help">По этому тексту AI подберёт картинку и напишет подпись к посту. На картинку он не попадает.</p></div>
   </div>
   <div class="step">
     <h2 class="stepTitle"><span>2</span>Макет</h2>
     <div class="layouts" role="group" aria-label="Макет">
-      <button type="button" class="lay" data-set="template" data-value="cover" aria-pressed="true"><div class="thumb cover"><b></b><b></b></div>Заголовок сверху</button>
-      <button type="button" class="lay" data-set="template" data-value="caps" aria-pressed="false"><div class="thumb caps"><b></b><b></b></div>Капсом снизу</button>
-      <button type="button" class="lay" data-set="template" data-value="card" aria-pressed="false"><div class="thumb card"><b></b><b></b><b></b><b></b><i></i><i></i></div>Карточка с текстом</button>
+      <button type="button" class="lay" data-set="template" data-value="cover" aria-pressed="true"><div class="thumb cover"><b></b><b></b><b></b></div>Обложка</button>
+      <button type="button" class="lay" data-set="template" data-value="art" aria-pressed="false"><div class="thumb art"><b></b><b></b><b></b><i></i></div>Текст и 3D</button>
+      <button type="button" class="lay" data-set="template" data-value="card" aria-pressed="false"><div class="thumb card"><b></b><b></b><b></b><i></i><i></i></div>Карточки</button>
     </div>
     <input type="hidden" id="template" value="cover">
   </div>
@@ -224,7 +223,7 @@ function setAccessUi(){
 function updateCost(){
   const n=Number($('count').value),on=!!(accessKey&&me);
   $('generate').textContent='Создать '+n+' '+(n===1?'вариант':'варианта');
-  $('genHint').textContent=on?('Спишется '+n+' из '+me.remaining+' генераций на сегодня'):'Демо: фоны из готовых рендеров, без AI';
+  $('genHint').textContent=on?('Спишется '+n+' из '+me.remaining+' генераций на сегодня'):'Демо: картинки из готовых рендеров, без AI';
 }
 async function refreshMe(){
   if(!accessKey){me=null;setAccessUi();return}
@@ -239,55 +238,31 @@ $('copyCaption').addEventListener('click',()=>{navigator.clipboard?.writeText($(
 
 // ---------------------------------------------------------------- отрисовка
 let tiles=[],seed=1;
-// ---------------------------------------------------------------- стиль Solar (тёмные посты из Figma TEST-SMM)
+// ---------------------------------------------------------------- посты в стиле серии «Баннеры для PR и SMM»
+// Пост собирается из полей формы в ту же разметку, что и слайды карусели, и рисуется тем же рендерером.
 const formatSizes={square:[1080,1080],wide:[1280,720],story:[1080,1920]};
-const ORANGE='#FE6E36',BLACK='#0E0E0E',FONT='"ONY One Beta","Golos Text",Arial,sans-serif';
-const logo=new Image();logo.src='assets/solar-logo.svg';
-const refs=['chips','cubes','box'].map(n=>{const i=new Image();i.src='assets/refs/'+n+'.jpg';return i});
-function wrap(ctx,text,maxWidth){const out=[];for(const para of String(text).split(/\n/)){const words=para.trim().split(/\s+/).filter(Boolean);let line='';for(const word of words){const test=line?line+' '+word:word;if(ctx.measureText(test).width>maxWidth&&line){out.push(line);line=word}else line=test}if(line)out.push(line)}return out}
-// Подбирает кегль, чтобы текст влез в заданное число строк (как автоуменьшение в макетах)
-function fitText(c,text,{size,min,weight,maxWidth,maxLines,lh}){for(let s=size;s>=min;s-=2){c.font=weight+' '+s+'px '+FONT;const lines=wrap(c,text,maxWidth);if(lines.length<=maxLines)return{lines,size:s,line:s*lh}}c.font=weight+' '+min+'px '+FONT;return{lines:wrap(c,text,maxWidth).slice(0,maxLines),size:min,line:min*lh}}
-function drawCover(c,img,w,h,focus){const s=Math.max(w/img.width,h/img.height),iw=img.width*s,ih=img.height*s;c.drawImage(img,(w-iw)/2,(h-ih)*(focus??.5),iw,ih)}
-function shade(c,w,h,from,to,y0,y1){const g=c.createLinearGradient(0,y0,0,y1);g.addColorStop(0,from);g.addColorStop(1,to);c.fillStyle=g;c.fillRect(0,Math.min(y0,y1),w,Math.abs(y1-y0))}
-// «Заголовок: текст» по абзацам → блоки карточки
-function cardBlocks(){const raw=$('cardText').value.trim();if(!raw)return[{label:$('headline').value.trim(),text:$('brief').value.trim()}];return raw.split(/\n\s*\n|\n(?=[^\n:]{1,40}:)/).map(p=>{const m=p.match(/^\s*([^:\n]{1,40}):\s*([\s\S]*)$/);return m?{label:m[1].trim(),text:m[2].trim()}:{label:'',text:p.trim()}}).filter(b=>b.label||b.text).slice(0,3)}
-
+function loadImg(src,trim){const o={img:null};const i=new Image();i.onload=()=>{o.img=trim?Carousel.trim(i):i;tiles.forEach(render);if(typeof carRenderAll==='function')carRenderAll()};i.src=src;return o}
+// Рендеры из макетов: показываем в демо и пока AI рисует свою картинку
+const demoCover=loadImg('assets/refs/keyboard.jpg'),demoArt=['assets/carousel/sheets.png','assets/carousel/check3d.png'].map(s=>loadImg(s,true));
+const POST_TEXT={
+  cover:{label:'Лид',help:'1–3 строки под заголовком. Первая строка станет оранжевой; *слова в звёздочках* — тоже.',value:'Защита данных и контроль работы\nс внешними и внутренними ИИ-сервисами'},
+  art:{label:'Текст',help:'Абзацы — через пустую строку, *слова в звёздочках* — оранжевым. Строки с «- » станут списком с галочками. Справа снизу будет 3D-иллюстрация.',value:'*Solar AI Firewall выявляет* попытки подмены инструкций и обхода ограничений, в том числе в передаваемых документах.\n\n- персональные данные\n- реквизиты\n- ключи доступа'},
+  card:{label:'Карточки',help:'Каждый блок с новой строки: «Подзаголовок: текст». До трёх блоков.',value:'Ситуация: Нейросеть присылает документ со скрытым вредоносным макросом.\n\nРешение: Solar webProxy проверяет файлы и блокирует опасные ответы нейросети.'},
+};
+function cardBlocks(raw){return raw.split(/\n\s*\n|\n(?=[^\n:]{1,40}:)/).map(p=>{const m=p.match(/^\s*([^:\n]{1,40}):\s*([\s\S]*)$/);return m?{label:m[1].trim(),text:m[2].trim()}:{label:'',text:p.trim()}}).filter(b=>b.label||b.text).slice(0,3)}
+function postSlide(){
+  const L=$('template').value,title=$('headline').value.trim()||'Заголовок поста',sub=$('subtitle').value.trim();let body=$('cardText').value.trim();
+  const out=['# '+title.replace(/\s*\n\s*/g,' ')];if(sub)out.push('> '+sub.replace(/\s*\n\s*/g,' '));out.push('');
+  if(L==='card'){for(const b of cardBlocks(body)){if(b.label)out.push('## '+b.label+':');if(b.text)out.push('| '+b.text.replace(/\s*\n\s*/g,' '));out.push('')}}
+  else if(body){if(L==='cover'&&!body.includes('*')){const [first,...rest]=body.split('\n');body=['*'+first.trim()+'*',...rest].join('\n')}out.push(body.replace(/^[ \t]*(={3,}|@)/gm,''))}
+  out.push('@art');
+  const sl=Carousel.parse(out.join('\n'))[0];sl.cover=L==='cover';return sl;
+}
 function render(t){
-const canvas=t.canvas;const fmt=$('format').value;const [w,h]=formatSizes[fmt];canvas.width=w;canvas.height=h;const c=canvas.getContext('2d');
-const s=Math.min(w,h)/1080,m=48*s,layout=$('template').value;
-c.fillStyle=BLACK;c.fillRect(0,0,w,h);
-const img=t.bg||(refs[(t.i+seed)%refs.length].complete?refs[(t.i+seed)%refs.length]:null);
-if(img&&img.width){drawCover(c,img,w,h,layout==='caps'?.35:.75)}
-c.textBaseline='top';
-if(layout==='cover'){
-  // Обложка: логотип, крупный заголовок сверху, рендер снизу
-  shade(c,w,h,'rgba(14,14,14,.95)','rgba(14,14,14,0)',0,h*.5);
-  drawLogo(c,m,m,s);
-  const t1=fitText(c,$('headline').value.trim()||'Заголовок поста',{size:Math.round(70*s),min:Math.round(44*s),weight:400,maxWidth:w-2*m-30*s,maxLines:4,lh:1.0});
-  c.fillStyle='#fff';t1.lines.forEach((l,k)=>c.fillText(l,m,188*s+k*t1.line));
-}else if(layout==='caps'){
-  // Заголовок капсом внизу, рендер сверху
-  shade(c,w,h,'rgba(14,14,14,0)','rgba(14,14,14,.96)',h*.5,h);
-  drawLogo(c,m,m,s);
-  const t1=fitText(c,($('headline').value.trim()||'Заголовок поста').toUpperCase(),{size:Math.round(80*s),min:Math.round(48*s),weight:400,maxWidth:w*.82,maxLines:4,lh:1.0});
-  c.fillStyle='#fff';const top=h-58*s-t1.lines.length*t1.line;t1.lines.forEach((l,k)=>c.fillText(l,m,top+k*t1.line));
-}else{
-  // Карточка: блоки «Ситуация / Решение» с оранжевыми подзаголовками и линией слева
-  shade(c,w,h,'rgba(0,0,0,.96)','rgba(0,0,0,0)',0,h*.62);
-  const x=83*s,maxW=w-x-84*s;let y=49*s;
-  for(const b of cardBlocks()){
-    const y0=y;
-    if(b.label){c.font='500 '+Math.round(30*s)+'px '+FONT;c.fillStyle=ORANGE;c.fillText(b.label,x,y);y+=48*s}
-    c.font='400 '+Math.round(30*s)+'px '+FONT;c.fillStyle='#fff';
-    const lines=wrap(c,b.text,maxW).slice(0,6);lines.forEach((l,k)=>c.fillText(l,x,y+k*33*s));y+=lines.length*33*s;
-    c.fillStyle='rgba(255,255,255,.55)';c.fillRect(45*s-1*s,y0+6*s,2*s,Math.max(10*s,y-y0-10*s));
-    y+=80*s;
-  }
+  const L=$('template').value;
+  let img=t.bg;if(!img&&!t.prompt)img=L==='cover'?demoCover.img:demoArt[(t.i+seed)%demoArt.length].img;
+  Carousel.render(t.canvas,postSlide(),{size:formatSizes[$('format').value],image:img,busy:t.busy,error:t.error});
 }
-if(t.busy||t.error){c.fillStyle='rgba(14,14,14,.66)';c.fillRect(0,0,w,h);c.fillStyle=t.error?'#f3b4b4':'#fff';c.font='500 '+Math.round(34*s)+'px '+FONT;c.textAlign='center';c.textBaseline='middle';
- const ls=wrap(c,t.error||t.busy,w*.8).slice(0,3);ls.forEach((l,k)=>c.fillText(l,w/2,h/2+(k-(ls.length-1)/2)*48*s));c.textAlign='left';c.textBaseline='top'}
-}
-function drawLogo(c,x,y,s){if(logo.complete&&logo.naturalWidth)c.drawImage(logo,x,y,246*s,48*s)}
 function download(canvas,name){canvas.toBlob(blob=>{if(!blob)return;let a=document.createElement('a');let url=URL.createObjectURL(blob);a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),3000)},'image/png')}
 
 // ---------------------------------------------------------------- генерация фона через API
@@ -299,22 +274,19 @@ async function jobImage(jobId){
   throw new ApiError(504,'Генерация заняла слишком долго — попробуйте ещё раз');
 }
 async function aiBackground(t){
-  if(t.running)return;t.running=true;t.error='';t.busy='Генерируем фон…';t.reroll.disabled=true;t.save.disabled=true;render(t);updateStatus();
+  if(t.running)return;t.running=true;t.error='';t.busy='Рисуем картинку…';t.reroll.disabled=true;t.save.disabled=true;render(t);updateStatus();
   try{
-    const start=await api('/api/background',{prompt:t.prompt,format:$('format').value});
+    const cover=$('template').value==='cover';
+    const start=await api('/api/background',{prompt:t.prompt,format:cover?$('format').value:'square',style:cover?'cover':'art'});
     if(me){me.used=start.used;me.remaining=start.remaining;setAccessUi()}
-    const deadline=Date.now()+180000;let done=false;
-    while(Date.now()<deadline){await sleep(3000);const st=await api('/api/status/'+start.job_id);if(st.status==='completed'){done=true;break}if(st.status==='failed')throw new ApiError(500,st.error||'Генерация не удалась')}
-    if(!done)throw new ApiError(504,'Генерация заняла слишком долго — попробуйте ещё раз');
-    const blob=await api('/api/image/'+start.job_id);
-    t.bg=await createImageBitmap(blob);t.ai=true;t.busy='';
+    t.bg=await jobImage(start.job_id);t.ai=true;t.busy='';
   }catch(e){t.busy='';t.error=e.message||'Не получилось'}
   finally{t.running=false;t.reroll.disabled=false;t.save.disabled=!!t.error&&!t.bg;render(t);updateStatus()}
 }
 function updateStatus(){
   if($('mode').value!=='post')return;
   const ready=tiles.filter(t=>!t.busy&&!t.error).length,busy=tiles.filter(t=>t.busy).length,err=tiles.filter(t=>t.error).length;
-  $('status').textContent=!tiles.length?'Пока пусто':busy?('Рисуем фоны… готово '+ready+' из '+tiles.length):(ready+' из '+tiles.length+' готово'+(err?' · не получилось: '+err:''));
+  $('status').textContent=!tiles.length?'Пока пусто':busy?('Рисуем картинки… готово '+ready+' из '+tiles.length):(ready+' из '+tiles.length+' готово'+(err?' · не получилось: '+err:''));
   $('downloadAll').disabled=!ready;$('generate').disabled=busy>0;
 }
 
@@ -324,7 +296,7 @@ function makeTile(i,prompt){
   const tile=document.createElement('div');tile.className='tile';const canvas=document.createElement('canvas');canvas.setAttribute('aria-label','Вариант '+(i+1));
   const foot=document.createElement('div');foot.className='tileFooter';const name=document.createElement('strong');name.textContent='Вариант '+(i+1);
   const controls=document.createElement('div');controls.className='actions';
-  const reroll=document.createElement('button');reroll.className='btn alt small';reroll.textContent='↻ Другой фон';reroll.title=prompt?'Нарисовать новый фон (−1 генерация)':'Взять другой рендер';
+  const reroll=document.createElement('button');reroll.className='btn alt small';reroll.textContent='↻ Картинка';reroll.title=prompt?'Нарисовать новую картинку (−1 генерация)':'Взять другой рендер';
   const save=document.createElement('button');save.className='btn alt small';save.textContent='Скачать PNG';
   Object.assign(t,{canvas,reroll,save});
   reroll.onclick=()=>{if(t.prompt)aiBackground(t);else{t.i+=1;render(t)}};
@@ -335,7 +307,7 @@ async function generate(){
   const count=Number($('count').value);seed++;tiles=[];gallery.replaceChildren();postCaption='';$('caption').hidden=true;
   if(!(accessKey&&me)){for(let i=0;i<count;i++)tiles.push(makeTile(i,''));updateStatus();return}
   if(me.remaining<count){$('status').textContent='На сегодня осталось генераций: '+me.remaining+'. Выберите меньше вариантов.';return}
-  $('generate').disabled=true;$('status').textContent='Подбираем фоны под ваш текст…';
+  $('generate').disabled=true;$('status').textContent='Подбираем картинки под ваш текст…';
   let plan;
   try{plan=await api('/api/plan',{brief:$('brief').value,headline:$('headline').value,template:$('template').value,format:$('format').value,count})}
   catch(e){$('status').textContent='✕ '+e.message;$('generate').disabled=false;return}
@@ -347,8 +319,6 @@ async function generate(){
 // ---------------------------------------------------------------- карусели
 const CAR_STORE='smm-studio-carousel',cg=$('cGallery');
 const car={slides:[],tiles:[],images:[],caption:'',sample:true,err:''};
-function loadImg(src,trim){const o={img:null};const i=new Image();i.onload=()=>{o.img=trim?Carousel.trim(i):i;carRenderAll()};i.src=src;return o}
-const demoCover=loadImg('assets/refs/keyboard.jpg'),demoArt=['assets/carousel/sheets.png','assets/carousel/check3d.png'].map(s=>loadImg(s,true));
 const hasImage=s=>!!(s&&(s.cover||s.hasArt));
 function artIndex(i){let n=0;for(let j=0;j<i;j++)if(car.slides[j].hasArt&&!car.slides[j].cover)n++;return n}
 function carRender(i){
@@ -439,9 +409,11 @@ Carousel.fontsReady().then(carRenderAll);
 $('generate').addEventListener('click',generate);
 $('downloadAll').addEventListener('click',()=>$('mode').value==='carousel'?car.tiles.forEach((t,k)=>setTimeout(()=>download(t.canvas,'carousel-'+String(k+1).padStart(2,'0')+'.png'),k*300)):tiles.filter(t=>!t.busy&&!t.error).forEach((t,k)=>setTimeout(()=>download(t.canvas,'post-'+$('format').value+'-'+(k+1)+'.png'),k*300)));
 // Правка заголовка, текста, формата или композиции сразу перерисовывает готовые варианты
-['headline','brief','format','template','cardText'].forEach(id=>$(id).addEventListener('input',()=>{$('cardField').hidden=$('template').value!=='card';tiles.forEach(render)}));
-Promise.all([document.fonts.load('400 70px "ONY One Beta"'),document.fonts.load('500 30px "ONY One Beta"'),document.fonts.load('400 70px "Golos Text"'),document.fonts.load('500 30px "Golos Text"')]).catch(()=>{}).then(()=>tiles.forEach(render));
-[logo,...refs].forEach(i=>i.addEventListener('load',()=>tiles.forEach(render)));
+// Подсказка и пример текста под выбранный макет; свой текст редактора не трогаем
+function syncPostText(){const d=POST_TEXT[$('template').value],ta=$('cardText');$('cardLabel').textContent=d.label;$('cardHelp').textContent=d.help;if(!ta.value.trim()||Object.values(POST_TEXT).some(x=>x.value===ta.value))ta.value=d.value}
+$('template').addEventListener('input',syncPostText);syncPostText();
+['headline','subtitle','brief','format','template','cardText'].forEach(id=>$(id).addEventListener('input',()=>tiles.forEach(render)));
+Carousel.fontsReady().then(()=>tiles.forEach(render));
 
 document.querySelectorAll('[data-set]').forEach(b=>b.addEventListener('click',()=>{
   const key=b.dataset.set;document.querySelectorAll('[data-set="'+key+'"]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));

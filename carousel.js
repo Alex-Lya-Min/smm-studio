@@ -13,9 +13,18 @@
 //   @art: промпт      3D-иллюстрация справа снизу (на обложке — фон обложки)
 (function () {
   'use strict';
-  const S = 1080, M = 45, FW = 990, BG = '#1b1e23', ORANGE = '#FE6E36', LINE = '#686868';
+  const M = 45, BG = '#1b1e23', ORANGE = '#FE6E36', LINE = '#686868';
   const SANS = '"ONY One Beta","Golos Text",Arial,sans-serif';
   const SERIF = '"PT Serif",Georgia,serif';
+  // Размер кадра: 1:1 — как в макетах; для сторис и баннера поля и зона картинки пересчитываются
+  let W = 1080, H = 1080, TOP = 45, BOT = 60, FW = 990;
+  function setFrame(w, h) {
+    W = w; H = h; FW = W - 2 * M;
+    const story = H > W * 1.5;
+    TOP = story ? 230 : 45; BOT = story ? 330 : 60;
+  }
+  const artY = () => Math.max(H - 640, TOP + 100);
+  const narrowW = () => Math.min(W - 480, 640);
   const WARN = new Path2D('M35.3654 6.16633C34.9757 5.48737 34.4137 4.92326 33.7361 4.53098C33.0586 4.1387 32.2896 3.93213 31.5067 3.93213C30.7238 3.93213 29.9548 4.1387 29.2773 4.53098C28.5997 4.92326 28.0377 5.48737 27.6479 6.16633L0.648513 52.1051C-1.15092 55.1685 1.00683 59.0627 4.50726 59.0627H58.5022C62.0026 59.0627 64.1643 55.1646 62.3609 52.1051L35.3654 6.16633ZM31.4988 19.6877C33.6054 19.6877 35.2552 21.5068 35.0426 23.6055L33.6644 37.4143C33.6181 37.9568 33.3699 38.4622 32.9689 38.8304C32.5679 39.1986 32.0433 39.403 31.4988 39.403C30.9544 39.403 30.4298 39.1986 30.0287 38.8304C29.6277 38.4622 29.3795 37.9568 29.3332 37.4143L27.9551 23.6055C27.9056 23.1103 27.9604 22.6102 28.1159 22.1375C28.2714 21.6647 28.5243 21.2298 28.8581 20.8607C29.192 20.4916 29.5994 20.1966 30.0542 19.9945C30.5091 19.7925 31.0012 19.688 31.4988 19.6877ZM31.5067 43.3127C32.551 43.3127 33.5525 43.7275 34.2909 44.466C35.0294 45.2044 35.4442 46.2059 35.4442 47.2502C35.4442 48.2945 35.0294 49.296 34.2909 50.0344C33.5525 50.7729 32.551 51.1877 31.5067 51.1877C30.4624 51.1877 29.4609 50.7729 28.7225 50.0344C27.984 49.296 27.5692 48.2945 27.5692 47.2502C27.5692 46.2059 27.984 45.2044 28.7225 44.466C29.4609 43.7275 30.4624 43.3127 31.5067 43.3127Z');
 
   // ------------------------------------------------------------------ разбор разметки
@@ -237,20 +246,19 @@
   const NARROW = { p: 1, list: 1, serif: 1 };
 
   // ------------------------------------------------------------------ вёрстка слайда
-  const ART = { x: 300, y: 440, w: 880, h: 680 };
 
   function layout(c, s, k) {
     const tf = sans(60 * k), tl = 66 * k;
     const title = s.title ? wrapRich(c, s.cover ? s.title.toUpperCase() : s.title, tf, FW) : [];
-    let y = M + title.length * tl;
+    let y = TOP + title.length * tl;
     let sub = [];
     if (s.subtitle) { sub = wrapRich(c, s.subtitle, sans(35 * k), FW - 66); y += (title.length ? 23 * k : 0) + sub.length * 38.5 * k; }
     const head = { title, sub, tf, tl, bottom: y };
 
     const art = s.hasArt && !s.cover;
     const measureAll = (narrowFrom) => s.blocks.map((b, i) => {
-      const narrow = art && NARROW[b.type] && i >= narrowFrom;
-      return { b, narrow, ...BLOCKS[b.type].measure(c, b, k, narrow ? 600 : FW) };
+      const narrow = art && (NARROW[b.type] || W > H) && i >= narrowFrom;
+      return { b, narrow, ...BLOCKS[b.type].measure(c, b, k, narrow ? narrowW() : FW) };
     });
     const place = (items) => {
       let cy = head.bottom + 60 * k, prev = null;
@@ -262,11 +270,11 @@
     // Если есть иллюстрация, блоки, которые заходят на неё, верстаем уже — текст обтекает картинку
     let items = place(measureAll(Infinity));
     if (art) {
-      const first = items.findIndex((it) => NARROW[it.b.type] && it.y >= ART.y - 60);
+      const first = items.findIndex((it) => (NARROW[it.b.type] || W > H) && it.y >= artY() - 60);
       if (first >= 0) items = place(measureAll(first));
     }
     const last = items.length ? items[items.length - 1].y + items[items.length - 1].h : head.bottom;
-    const free = S - 60 - last;
+    const free = H - BOT - last;
     // Свободное место делим между отступом после шапки и промежутками, как в макетах
     if (free > 0 && items.length && !s.cover) {
       let shift = 0;
@@ -287,36 +295,36 @@
 
   function fit(c, s) {
     let L;
-    for (const k of [1, 0.94, 0.88, 0.82, 0.77, 0.72, 0.68]) { L = layout(c, s, k); if (L.free >= 0) return L; }
+    for (const k of [...(H > W * 1.5 ? [1.2, 1.1] : []), 1, 0.94, 0.88, 0.82, 0.77, 0.72, 0.68]) { L = layout(c, s, k); if (L.free >= 0) return L; }
     return L;
   }
 
   // ------------------------------------------------------------------ картинки
   function drawCoverImage(c, img) {
     if (img && img.width) {
-      const sc = Math.max(S / img.width, S / img.height), w = img.width * sc, h = img.height * sc;
-      c.drawImage(img, (S - w) / 2, (S - h) / 2, w, h);
-      c.save(); c.globalCompositeOperation = 'screen'; c.globalAlpha = 0.6; c.fillStyle = BG; c.fillRect(0, 0, S, S); c.restore();
+      const sc = Math.max(W / img.width, H / img.height), w = img.width * sc, h = img.height * sc;
+      c.drawImage(img, (W - w) / 2, (H - h) / 2, w, h);
+      c.save(); c.globalCompositeOperation = 'screen'; c.globalAlpha = 0.6; c.fillStyle = BG; c.fillRect(0, 0, W, H); c.restore();
     } else {
-      const g = c.createRadialGradient(700, 760, 20, 700, 760, 520);
+      const g = c.createRadialGradient(W * 0.65, H * 0.7, 20, W * 0.65, H * 0.7, Math.min(W, H) * 0.48);
       g.addColorStop(0, 'rgba(254,110,54,.35)'); g.addColorStop(1, 'rgba(254,110,54,0)');
-      c.fillStyle = g; c.fillRect(0, 0, S, S);
+      c.fillStyle = g; c.fillRect(0, 0, W, H);
     }
-    const g = c.createLinearGradient(0, 0, 0, 372);
-    g.addColorStop(0, BG); g.addColorStop(1, 'rgba(27,30,35,0)');
-    c.fillStyle = g; c.fillRect(0, 0, S, 372);
+    const gh = TOP + 330, g = c.createLinearGradient(0, 0, 0, gh);
+    g.addColorStop(0, BG); g.addColorStop(TOP / gh, BG); g.addColorStop(1, 'rgba(27,30,35,0)');
+    c.fillStyle = g; c.fillRect(0, 0, W, gh);
   }
   // Иллюстрация справа снизу: прозрачный PNG ставим как есть, сгенерированную картинку растворяем по краям в фон
   function drawArt(c, img, top) {
     if (!img || !img.width) return;
-    const y0 = Math.max(ART.y, top);
+    const y0 = Math.max(artY(), top);
     if (img.transparent) {
-      const box = { x: 400, y: y0 + 10, w: 680, h: Math.min(540, S - 40 - y0) };
+      const box = { x: W - 680, y: y0 + 10, w: 680, h: Math.min(540, H - 40 - y0) };
       const sc = Math.min(box.w / img.width, box.h / img.height), w = img.width * sc, h = img.height * sc;
       c.drawImage(img, box.x + box.w - w, box.y + (box.h - h) / 2, w, h);
       return;
     }
-    const size = Math.min(720, S + 60 - y0), x = S - size + 50, y = S - size + 40;
+    const size = Math.min(720, H + 60 - y0), x = W - size + 50, y = H - size + 40;
     const off = document.createElement('canvas'); off.width = off.height = Math.ceil(size);
     const o = off.getContext('2d');
     const sc = Math.max(size / img.width, size / img.height);
@@ -344,9 +352,11 @@
 
   // ------------------------------------------------------------------ отрисовка
   function render(canvas, s, opt = {}) {
-    canvas.width = S; canvas.height = S;
+    const [fw, fh] = opt.size || [1080, 1080];
+    setFrame(fw, fh);
+    canvas.width = W; canvas.height = H;
     const c = canvas.getContext('2d');
-    c.fillStyle = BG; c.fillRect(0, 0, S, S);
+    c.fillStyle = BG; c.fillRect(0, 0, W, H);
     if (!s) return;
     const L = fit(c, s), k = L.k;
     if (s.cover) drawCoverImage(c, opt.image);
@@ -355,16 +365,16 @@
       drawArt(c, opt.image, wideBottom - 40);
     }
     let snap = null;
-    if (opt.image && s.hasArt) { snap = document.createElement('canvas'); snap.width = snap.height = S; snap.getContext('2d').drawImage(canvas, 0, 0); }
+    if (opt.image && s.hasArt) { snap = document.createElement('canvas'); snap.width = W; snap.height = H; snap.getContext('2d').drawImage(canvas, 0, 0); }
 
     const { head } = L;
-    drawLines(c, head.title, head.tf, M, M, head.tl, '#fff');
+    drawLines(c, head.title, head.tf, M, TOP, head.tl, '#fff');
     if (head.sub.length) drawLines(c, head.sub, sans(35 * k), M, head.bottom - head.sub.length * 38.5 * k, 38.5 * k, '#fff', { alpha: 0.7 });
 
     if (s.cover) {
       // Обложка: под шапкой — лид, первая строка обычно оранжевая
       const text = s.blocks.filter((b) => b.text).map((b) => b.text).join('\n');
-      if (text) { const lh = 42 * k, lines = wrapRich(c, text, sans(35 * k), 640); drawLines(c, lines, sans(35 * k), M, head.bottom + 60 * k, lh, '#fff'); }
+      if (text) { const lh = 42 * k, lines = wrapRich(c, text, sans(35 * k), Math.min(640, FW)); drawLines(c, lines, sans(35 * k), M, head.bottom + 60 * k, lh, '#fff'); }
     } else {
       for (const it of L.items) BLOCKS[it.b.type].draw(c, it.b, it, M, it.y, k, snap);
     }
@@ -372,7 +382,7 @@
   }
   function badge(c, text, err) {
     c.save(); c.font = '500 26px ' + SANS;
-    const w = Math.min(S - 90, c.measureText(text).width + 48), x = S - M - w, y = S - M - 56;
+    const w = Math.min(W - 90, c.measureText(text).width + 48), x = W - M - w, y = H - Math.max(M, BOT - 40) - 56;
     c.fillStyle = 'rgba(14,14,16,.82)'; rr(c, x, y, w, 56, 28); c.fill();
     c.fillStyle = err ? '#f3b4b4' : '#fff'; c.textBaseline = 'middle'; c.fillText(text, x + 24, y + 29, w - 48);
     c.restore();
@@ -445,5 +455,5 @@
 При настроенной интеграции события и инциденты *можно передавать в SIEM и SOAR.*
 @art: a big orange translucent glass checkmark next to a small dark glass cube with a glowing orange core`;
 
-  window.Carousel = { parse, render, fontsReady, trim, DEMO, SIZE: S };
+  window.Carousel = { parse, render, fontsReady, trim, DEMO };
 })();
