@@ -1,0 +1,26 @@
+{
+  // SMM Studio API. Деплоится автоматически из GitHub Actions (.github/workflows/deploy-worker.yml).
+  "name": "api",
+  "main": "src/index.js",
+  "compatibility_date": "2025-09-01",
+  "workers_dev": true,
+  "preview_urls": false,
+  "observability": { "enabled": true },
+  "vars": {
+    // Кому разрешено обращаться к API из браузера (через запятую)
+    "ALLOWED_ORIGINS": "https://alex-lya-min.github.io",
+    "ALLOW_LOCALHOST": "false",
+    // Часовой пояс команды для сброса дневного лимита (Сингапур = 8)
+    "TZ_OFFSET_HOURS": "8",
+    // Общий лимит генераций фона на всю команду в день
+    "TEAM_DAILY_LIMIT": "30",
+    "CLAUDE_MODEL": "claude-sonnet-5-5",
+    "KREA_MODEL": "google/nano-banana-pro",
+    "KREA_RESOLUTION": "1K"
+  },
+  "durable_objects": {
+    "bindings": [{ "name": "USAGE", "class_name": "Usage" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Usage"] }]
+  // Секреты (задаются из GitHub Secrets при деплое): ANTHROPIC_API_KEY, KREA_API_TOKEN, ACCESS_KEYS
+}
