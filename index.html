@@ -78,6 +78,10 @@ font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;c
 .cheat{margin:8px 0 0;font-size:12px;color:var(--muted)}.cheat summary{cursor:pointer;color:var(--text);font-weight:600}
 .cheat dl{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;margin:10px 0 0}.cheat dt{font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--accent2);white-space:nowrap}.cheat dd{margin:0}
 .seg.slides button{padding:8px 4px}
+.toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:14px 0 0;font-size:13px;font-weight:600;cursor:pointer}
+.toggle input{appearance:none;width:38px;height:22px;border-radius:99px;background:#0c0d10;border:1px solid var(--line2);position:relative;cursor:pointer;flex:none;margin:0;transition:background .15s}
+.toggle input::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--muted);transition:transform .15s,background .15s}
+.toggle input:checked{background:var(--accent);border-color:var(--accent)}.toggle input:checked::after{transform:translateX(16px);background:#fff}
 .tile .tag{font-size:11px;color:var(--muted);font-weight:400;margin-left:6px}
 @media(max-width:520px){.row2{grid-template-columns:1fr}.seg.count{justify-self:start}.panel{padding:16px}.login form{flex-basis:100%}.chip .long{display:none}.brand{font-size:16px}}
 </style></head>
@@ -120,6 +124,7 @@ font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;c
       <button type="button" class="lay" data-set="template" data-value="card" aria-pressed="false"><div class="thumb card"><b></b><b></b><b></b><i></i><i></i></div>Карточки</button>
     </div>
     <input type="hidden" id="template" value="cover">
+    <label class="toggle">Логотип Solar на картинке<input type="checkbox" id="logo"></label>
   </div>
   <div class="step">
     <h2 class="stepTitle"><span>3</span>Формат и количество</h2>
@@ -157,6 +162,7 @@ font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;c
       <button type="button" data-set="cSlides" data-value="7" aria-pressed="false">7</button>
     </div>
     <input type="hidden" id="cSlides" value="0">
+    <label class="toggle">Логотип Solar на обложке<input type="checkbox" id="cLogo"></label>
   </div>
   <button id="cGenerate" class="btn wide">Собрать карусель</button>
   <p class="cost" id="cHint"></p>
@@ -243,6 +249,7 @@ let tiles=[],seed=1;
 const formatSizes={square:[1080,1080],wide:[1280,720],story:[1080,1920]};
 function loadImg(src,trim){const o={img:null};const i=new Image();i.onload=()=>{o.img=trim?Carousel.trim(i):i;tiles.forEach(render);if(typeof carRenderAll==='function')carRenderAll()};i.src=src;return o}
 // Рендеры из макетов: показываем в демо и пока AI рисует свою картинку
+const logoImg=new Image();logoImg.onload=()=>{tiles.forEach(render);if(typeof carRenderAll==='function')carRenderAll()};logoImg.src='assets/solar-logo.svg';
 const demoCover=loadImg('assets/refs/keyboard.jpg'),demoArt=['assets/carousel/sheets.png','assets/carousel/check3d.png'].map(s=>loadImg(s,true));
 const POST_TEXT={
   cover:{label:'Лид',help:'1–3 строки под заголовком. Первая строка станет оранжевой; *слова в звёздочках* — тоже.',value:'Защита данных и контроль работы\nс внешними и внутренними ИИ-сервисами'},
@@ -261,7 +268,7 @@ function postSlide(){
 function render(t){
   const L=$('template').value;
   let img=t.bg;if(!img&&!t.prompt)img=L==='cover'?demoCover.img:demoArt[(t.i+seed)%demoArt.length].img;
-  Carousel.render(t.canvas,postSlide(),{size:formatSizes[$('format').value],image:img,busy:t.busy,error:t.error});
+  Carousel.render(t.canvas,postSlide(),{size:formatSizes[$('format').value],image:img,busy:t.busy,error:t.error,logo:$('logo').checked?logoImg:null});
 }
 function download(canvas,name){canvas.toBlob(blob=>{if(!blob)return;let a=document.createElement('a');let url=URL.createObjectURL(blob);a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),3000)},'image/png')}
 
@@ -325,7 +332,7 @@ function carRender(i){
   const t=car.tiles[i],s=car.slides[i];if(!t||!s)return;const st=car.images[i];
   // Пока AI не рисовал картинку для слайда, показываем рендер из макетов
   let img=null;if(hasImage(s))img=st?st.img:(s.cover?demoCover.img:demoArt[artIndex(i)%demoArt.length].img);
-  Carousel.render(t.canvas,s,{image:img,busy:st&&st.busy,error:st&&st.error});
+  Carousel.render(t.canvas,s,{image:img,busy:st&&st.busy,error:st&&st.error,logo:s.cover&&$('cLogo').checked?logoImg:null});
   t.reroll.hidden=!hasImage(s);t.reroll.disabled=!!(st&&st.running);
   t.tag.textContent=s.cover?'обложка':'';
 }
@@ -414,6 +421,8 @@ function syncPostText(){const d=POST_TEXT[$('template').value],ta=$('cardText');
 $('template').addEventListener('input',syncPostText);syncPostText();
 ['headline','subtitle','brief','format','template','cardText'].forEach(id=>$(id).addEventListener('input',()=>tiles.forEach(render)));
 Carousel.fontsReady().then(()=>tiles.forEach(render));
+// Настройка логотипа запоминается в браузере
+[['logo','smm-studio-logo'],['cLogo','smm-studio-clogo']].forEach(([id,key])=>{try{$(id).checked=localStorage.getItem(key)==='1'}catch{}$(id).addEventListener('change',()=>{try{localStorage.setItem(key,$(id).checked?'1':'0')}catch{}tiles.forEach(render);carRenderAll()})});
 
 document.querySelectorAll('[data-set]').forEach(b=>b.addEventListener('click',()=>{
   const key=b.dataset.set;document.querySelectorAll('[data-set="'+key+'"]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));

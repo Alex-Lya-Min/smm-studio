@@ -354,6 +354,9 @@
   function render(canvas, s, opt = {}) {
     const [fw, fh] = opt.size || [1080, 1080];
     setFrame(fw, fh);
+    // Логотип ставим над заголовком, а шапку сдвигаем вниз, чтобы ничего не перекрывалось
+    const logo = opt.logo && (opt.logo.naturalWidth || opt.logo.width) ? opt.logo : null, logoY = TOP;
+    if (logo) TOP += 48 + 42;
     canvas.width = W; canvas.height = H;
     const c = canvas.getContext('2d');
     c.fillStyle = BG; c.fillRect(0, 0, W, H);
@@ -368,6 +371,7 @@
     if (opt.image && s.hasArt) { snap = document.createElement('canvas'); snap.width = W; snap.height = H; snap.getContext('2d').drawImage(canvas, 0, 0); }
 
     const { head } = L;
+    if (logo) c.drawImage(logo, M, logoY, 246, 48);
     drawLines(c, head.title, head.tf, M, TOP, head.tl, '#fff');
     if (head.sub.length) drawLines(c, head.sub, sans(35 * k), M, head.bottom - head.sub.length * 38.5 * k, 38.5 * k, '#fff', { alpha: 0.7 });
 
