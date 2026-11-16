@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#101117"><title>SMM Studio</title>
 <style>
-@font-face{font-family:"ONY One Beta";src:local("ONY One Beta"),url(fonts/ony/ONYOne-Regular.woff2) format("woff2"),url(fonts/ony/ONYOne-Regular.woff) format("woff");font-weight:400;font-display:block}@font-face{font-family:"ONY One Beta";src:local("ONY One Beta Medium"),url(fonts/ony/ONYOne-Medium.woff2) format("woff2"),url(fonts/ony/ONYOne-Medium.woff) format("woff");font-weight:500;font-display:block}@font-face{font-family:"Golos Text";src:url(fonts/fallback/golos-text-cyrillic-400-normal.woff2) format("woff2");font-weight:400;unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}@font-face{font-family:"Golos Text";src:url(fonts/fallback/golos-text-latin-400-normal.woff2) format("woff2");font-weight:400;unicode-range:U+0000-00FF,U+2000-206F}@font-face{font-family:"Golos Text";src:url(fonts/fallback/golos-text-cyrillic-500-normal.woff2) format("woff2");font-weight:500;unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}@font-face{font-family:"Golos Text";src:url(fonts/fallback/golos-text-latin-500-normal.woff2) format("woff2");font-weight:500;unicode-range:U+0000-00FF,U+2000-206F}
+@font-face{font-family:"ONY One Beta";src:local("ONY One Beta"),url(fonts/ony/ONYOne-Regular.woff2) format("woff2"),url(fonts/ony/ONYOne-Regular.woff) format("woff");font-weight:400;font-display:block}@font-face{font-family:"ONY One Beta";src:local("ONY One Beta Medium"),url(fonts/ony/ONYOne-Medium.woff2) format("woff2"),url(fonts/ony/ONYOne-Medium.woff) format("woff");font-weight:500;font-display:block}@font-face{font-family:"Golos Text";src:url(fonts/fallback/golos-text-cyrillic-400-normal.woff2) format("woff2");font-weight:400;unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}@font-face{font-family:"Golos Text";src:url(fonts/fallback/golos-text-latin-400-normal.woff2) format("woff2");font-weight:400;unicode-range:U+0000-00FF,U+2000-206F}@font-face{font-family:"Golos Text";src:url(fonts/fallback/golos-text-cyrillic-500-normal.woff2) format("woff2");font-weight:500;unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}@font-face{font-family:"Golos Text";src:url(fonts/fallback/golos-text-latin-500-normal.woff2) format("woff2");font-weight:500;unicode-range:U+0000-00FF,U+2000-206F}@font-face{font-family:"Solar Serif";src:local("William Text LC"),local("WilliamTextLC-Regular");font-weight:400;font-display:block}@font-face{font-family:"PT Serif";src:url(fonts/serif/pt-serif-cyrillic-400-normal.woff2) format("woff2");font-weight:400;size-adjust:106%;unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}@font-face{font-family:"PT Serif";src:url(fonts/serif/pt-serif-latin-400-normal.woff2) format("woff2");font-weight:400;size-adjust:106%;unicode-range:U+0000-00FF,U+2000-206F}
 :root{--bg:#101114;--panel:#17181c;--panel2:#1d1e23;--line:#2a2b31;--line2:#3a3b43;--text:#ececf0;--muted:#9a9ba6;--accent:#FE6E36;--accent2:#ff8a5c;--ok:#7fd18b;--err:#f3a3a3;
 font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:var(--text);background:var(--bg);font-synthesis:none}
 *{box-sizing:border-box}[hidden]{display:none!important}body{margin:0}button,input,select,textarea{font:inherit;color:inherit}button{cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}
@@ -73,6 +73,12 @@ font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;c
 .note{margin:16px 0 0;font-size:12px;color:var(--muted);line-height:1.5}
 @media(max-width:900px){.layout{grid-template-columns:1fr}.form{position:static}.shell{padding:0 16px 40px}}
 .chip .full{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mode{margin:0 0 22px}.mode button{padding:10px 6px;font-size:14px;font-weight:600}
+.markup{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.55;min-height:380px!important;white-space:pre-wrap;overflow-wrap:anywhere;tab-size:2}
+.cheat{margin:8px 0 0;font-size:12px;color:var(--muted)}.cheat summary{cursor:pointer;color:var(--text);font-weight:600}
+.cheat dl{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;margin:10px 0 0}.cheat dt{font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--accent2);white-space:nowrap}.cheat dd{margin:0}
+.seg.slides button{padding:8px 4px}
+.tile .tag{font-size:11px;color:var(--muted);font-weight:400;margin-left:6px}
 @media(max-width:520px){.row2{grid-template-columns:1fr}.seg.count{justify-self:start}.panel{padding:16px}.login form{flex-basis:100%}.chip .long{display:none}.brand{font-size:16px}}
 </style></head>
 <body><div class="shell">
@@ -92,7 +98,13 @@ font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;c
 <div id="keyOut" hidden></div>
 
 <main class="layout">
-<section class="panel form" aria-label="Параметры поста">
+<section class="panel form" aria-label="Параметры">
+  <div class="seg mode" role="group" aria-label="Что делаем">
+    <button type="button" data-set="mode" data-value="post" aria-pressed="true">Пост</button>
+    <button type="button" data-set="mode" data-value="carousel" aria-pressed="false">Карусель</button>
+  </div>
+  <input type="hidden" id="mode" value="post">
+  <div id="postForm">
   <div class="step">
     <h2 class="stepTitle"><span>1</span>Текст</h2>
     <div class="field"><label for="headline">Заголовок на картинке <small id="headCount"></small></label><input class="input" id="headline" maxlength="100" value="Данные под защитой" placeholder="Например: Данные под защитой"></div>
@@ -128,15 +140,58 @@ font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;c
   </div>
   <button id="generate" class="btn wide">Создать 2 варианта</button>
   <p class="cost" id="genHint"></p>
+  </div>
+
+  <div id="carouselForm" hidden>
+  <div class="step">
+    <h2 class="stepTitle"><span>1</span>О чём карусель</h2>
+    <div class="field"><label for="cTitle">Продукт или тема <small>для обложки, необязательно</small></label><input class="input" id="cTitle" maxlength="120" placeholder="Например: Solar AI Firewall"></div>
+    <div class="field"><label for="cBrief">Бриф</label><textarea class="input" id="cBrief" maxlength="4000" style="min-height:150px" placeholder="Что за продукт, для кого, какие 3–5 главных мыслей, какие факты обязательно упомянуть">Solar AI Firewall — защита данных и контроль работы сотрудников с внешними и внутренними ИИ-сервисами. Задаёт правила для сотрудников, подразделений и приложений. Выявляет чувствительные данные в запросах и ответах (персональные данные, реквизиты, ключи доступа), маскирует их или блокирует передачу. Выявляет попытки подмены инструкций. Позволяет ставить лимиты на запросы, токены и бюджет, передаёт события в SIEM и SOAR.</textarea><p class="help">AI разложит текст по слайдам и не добавит фактов, которых здесь нет.</p></div>
+  </div>
+  <div class="step">
+    <h2 class="stepTitle"><span>2</span>Сколько слайдов</h2>
+    <div class="seg slides" role="group" aria-label="Количество слайдов">
+      <button type="button" data-set="cSlides" data-value="0" aria-pressed="true">Авто</button>
+      <button type="button" data-set="cSlides" data-value="4" aria-pressed="false">4</button>
+      <button type="button" data-set="cSlides" data-value="5" aria-pressed="false">5</button>
+      <button type="button" data-set="cSlides" data-value="6" aria-pressed="false">6</button>
+      <button type="button" data-set="cSlides" data-value="7" aria-pressed="false">7</button>
+    </div>
+    <input type="hidden" id="cSlides" value="0">
+  </div>
+  <button id="cGenerate" class="btn wide">Собрать карусель</button>
+  <p class="cost" id="cHint"></p>
+  <div class="step" style="margin-top:26px">
+    <h2 class="stepTitle"><span>3</span>Текст слайдов</h2>
+    <div class="field"><textarea class="input markup" id="cMarkup" spellcheck="false" aria-label="Разметка слайдов"></textarea>
+    <p class="help">Правки сразу видны на слайдах. Сюда же попадает текст от AI — его можно дописать или сократить.</p>
+    <details class="cheat"><summary>Как размечать</summary><dl>
+      <dt>===</dt><dd>новый слайд (первый — обложка)</dd>
+      <dt># текст</dt><dd>заголовок; две строки с # — перенос</dd>
+      <dt>&gt; текст</dt><dd>подзаголовок, приглушённый</dd>
+      <dt>## текст</dt><dd>оранжевый акцент с засечками</dd>
+      <dt>*слова*</dt><dd>выделить оранжевым</dd>
+      <dt>- пункт</dt><dd>список с галочками</dd>
+      <dt>- [Метка] текст</dt><dd>пункт с оранжевой плашкой</dd>
+      <dt>| текст</dt><dd>стеклянная карточка</dd>
+      <dt>! текст</dt><dd>предупреждение с треугольником</dd>
+      <dt>+ а | б | в</dt><dd>ряд плашек с галочками</dd>
+      <dt>@art: …</dt><dd>3D-картинка справа снизу (на обложке — фон); описание по-английски</dd>
+      <dt>пустая строка</dt><dd>новый абзац</dd>
+    </dl></details></div>
+  </div>
+  </div>
 </section>
 
 <section aria-label="Результаты">
-  <div class="resultHead"><div><h2>Варианты</h2><div class="status" id="status">Пока пусто</div></div><button id="downloadAll" class="btn alt small" disabled>Скачать все PNG</button></div>
+  <div class="resultHead"><div><h2 id="resultTitle">Варианты</h2><div class="status" id="status">Пока пусто</div></div><button id="downloadAll" class="btn alt small" disabled>Скачать все PNG</button></div>
+  <div id="cGallery" class="gallery" hidden></div>
   <div id="gallery" class="gallery"><div class="empty"><div><h3>Здесь появятся варианты поста</h3>Заполните текст, выберите макет и нажмите «Создать».<br>Заголовок можно править и после — картинка обновится сразу.</div></div></div>
   <div id="caption" class="caption" hidden><h3>Подпись к посту</h3><p id="captionText"></p><button type="button" class="btn alt small" id="copyCaption">Копировать</button></div>
   <p class="note" id="note"></p>
 </section>
 </main></div>
+<script src="carousel.js"></script>
 <script>
 (()=>{'use strict';
 const $=id=>document.getElementById(id),gallery=$('gallery');
@@ -163,7 +218,7 @@ function setAccessUi(){
   $('keyForm').hidden=on;$('logout').hidden=!on;
   $('accessPill').className='chip'+(on?' on':'');
   $('accessInfo').innerHTML='';if(on){const n=document.createElement('span');n.textContent=me.name+' · ';const l=document.createElement('span');l.className='long';l.textContent='осталось ';const r=document.createElement('span');r.textContent=me.remaining+' из '+me.limit;const d=document.createElement('span');d.className='long';d.textContent=' сегодня';$('accessInfo').append(n,l,r,d)}else $('accessInfo').textContent='Демо-режим';
-  updateCost();
+  updateCost();carHint();
   $('note').textContent=on?'Текст из поля «О чём пост» и заголовок отправляются в AI-сервисы. Не вставляйте конфиденциальные данные. Готовые картинки не сохраняются — скачайте нужные.':'';
 }
 function updateCost(){
@@ -237,6 +292,12 @@ function download(canvas,name){canvas.toBlob(blob=>{if(!blob)return;let a=docume
 
 // ---------------------------------------------------------------- генерация фона через API
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+// Ждёт задачу Krea и забирает готовую картинку
+async function jobImage(jobId){
+  const deadline=Date.now()+180000;
+  while(Date.now()<deadline){await sleep(3000);const st=await api('/api/status/'+jobId);if(st.status==='completed')return createImageBitmap(await api('/api/image/'+jobId));if(st.status==='failed')throw new ApiError(500,st.error||'Генерация не удалась')}
+  throw new ApiError(504,'Генерация заняла слишком долго — попробуйте ещё раз');
+}
 async function aiBackground(t){
   if(t.running)return;t.running=true;t.error='';t.busy='Генерируем фон…';t.reroll.disabled=true;t.save.disabled=true;render(t);updateStatus();
   try{
@@ -251,6 +312,7 @@ async function aiBackground(t){
   finally{t.running=false;t.reroll.disabled=false;t.save.disabled=!!t.error&&!t.bg;render(t);updateStatus()}
 }
 function updateStatus(){
+  if($('mode').value!=='post')return;
   const ready=tiles.filter(t=>!t.busy&&!t.error).length,busy=tiles.filter(t=>t.busy).length,err=tiles.filter(t=>t.error).length;
   $('status').textContent=!tiles.length?'Пока пусто':busy?('Рисуем фоны… готово '+ready+' из '+tiles.length):(ready+' из '+tiles.length+' готово'+(err?' · не получилось: '+err:''));
   $('downloadAll').disabled=!ready;$('generate').disabled=busy>0;
@@ -270,20 +332,112 @@ function makeTile(i,prompt){
   controls.append(reroll,save);foot.append(name,controls);tile.append(canvas,foot);gallery.append(tile);render(t);return t;
 }
 async function generate(){
-  const count=Number($('count').value);seed++;tiles=[];gallery.replaceChildren();$('caption').hidden=true;
+  const count=Number($('count').value);seed++;tiles=[];gallery.replaceChildren();postCaption='';$('caption').hidden=true;
   if(!(accessKey&&me)){for(let i=0;i<count;i++)tiles.push(makeTile(i,''));updateStatus();return}
   if(me.remaining<count){$('status').textContent='На сегодня осталось генераций: '+me.remaining+'. Выберите меньше вариантов.';return}
   $('generate').disabled=true;$('status').textContent='Подбираем фоны под ваш текст…';
   let plan;
   try{plan=await api('/api/plan',{brief:$('brief').value,headline:$('headline').value,template:$('template').value,format:$('format').value,count})}
   catch(e){$('status').textContent='✕ '+e.message;$('generate').disabled=false;return}
-  if(plan.caption){$('captionText').textContent=plan.caption;$('caption').hidden=false}
+  postCaption=plan.caption||'';showCaption();
   tiles=plan.prompts.map((p,i)=>makeTile(i,p));updateStatus();
   // Запускаем по очереди с небольшим шагом, чтобы не упереться в лимиты API
   tiles.forEach((t,k)=>setTimeout(()=>aiBackground(t),k*400));
 }
+// ---------------------------------------------------------------- карусели
+const CAR_STORE='smm-studio-carousel',cg=$('cGallery');
+const car={slides:[],tiles:[],images:[],caption:'',sample:true,err:''};
+function loadImg(src,trim){const o={img:null};const i=new Image();i.onload=()=>{o.img=trim?Carousel.trim(i):i;carRenderAll()};i.src=src;return o}
+const demoCover=loadImg('assets/refs/keyboard.jpg'),demoArt=['assets/carousel/sheets.png','assets/carousel/check3d.png'].map(s=>loadImg(s,true));
+const hasImage=s=>!!(s&&(s.cover||s.hasArt));
+function artIndex(i){let n=0;for(let j=0;j<i;j++)if(car.slides[j].hasArt&&!car.slides[j].cover)n++;return n}
+function carRender(i){
+  const t=car.tiles[i],s=car.slides[i];if(!t||!s)return;const st=car.images[i];
+  // Пока AI не рисовал картинку для слайда, показываем рендер из макетов
+  let img=null;if(hasImage(s))img=st?st.img:(s.cover?demoCover.img:demoArt[artIndex(i)%demoArt.length].img);
+  Carousel.render(t.canvas,s,{image:img,busy:st&&st.busy,error:st&&st.error});
+  t.reroll.hidden=!hasImage(s);t.reroll.disabled=!!(st&&st.running);
+  t.tag.textContent=s.cover?'обложка':'';
+}
+function carRenderAll(){car.tiles.forEach((t,i)=>carRender(i))}
+function carBuild(){
+  cg.replaceChildren();
+  car.tiles=car.slides.map((s,i)=>{
+    const tile=document.createElement('div');tile.className='tile';const canvas=document.createElement('canvas');canvas.setAttribute('aria-label','Слайд '+(i+1));
+    const foot=document.createElement('div');foot.className='tileFooter';const name=document.createElement('strong');name.textContent='Слайд '+(i+1);const tag=document.createElement('span');tag.className='tag';name.append(tag);
+    const controls=document.createElement('div');controls.className='actions';
+    const reroll=document.createElement('button');reroll.className='btn alt small';reroll.textContent='↻ Картинка';
+    const save=document.createElement('button');save.className='btn alt small';save.textContent='PNG';
+    reroll.onclick=()=>{if(accessKey&&me)carImage(i);else{const d=demoArt.shift();demoArt.push(d);carRenderAll()}};
+    save.onclick=()=>download(canvas,'carousel-'+String(i+1).padStart(2,'0')+'.png');
+    controls.append(reroll,save);foot.append(name,controls);tile.append(canvas,foot);cg.append(tile);
+    return {canvas,reroll,tag};
+  });
+  if(!car.slides.length){const e=document.createElement('div');e.className='empty';e.innerHTML='<div><h3>Слайдов пока нет</h3>Нажмите «Собрать карусель» или напишите текст слайдов слева.</div>';cg.append(e)}
+  carRenderAll();
+}
+let carTimer=0;
+function carParse(){
+  car.slides=Carousel.parse($('cMarkup').value);
+  if(car.tiles.length!==car.slides.length)carBuild();else carRenderAll();
+  carStatus();
+}
+$('cMarkup').addEventListener('input',()=>{car.sample=false;car.err='';cancelAnimationFrame(carTimer);carTimer=requestAnimationFrame(carParse);clearTimeout(carParse.save);carParse.save=setTimeout(()=>{try{localStorage.setItem(CAR_STORE,$('cMarkup').value)}catch{}},500)});
+function carStatus(){
+  const busy=car.images.filter(x=>x&&x.running).length,err=car.images.filter(x=>x&&x.error).length,n=car.slides.length;
+  const word=n%10===1&&n%100!==11?'слайд':n%10>=2&&n%10<=4&&(n%100<12||n%100>14)?'слайда':'слайдов';
+  const text=car.err||(!n?'Нет слайдов':busy?('Рисуем картинки… осталось '+busy):(n+' '+word+(car.sample?' · пример из макетов':'')+(err?' · картинка не получилась: '+err:'')));
+  if($('mode').value!=='carousel')return;
+  $('status').textContent=text;$('downloadAll').disabled=!n||busy>0;$('cGenerate').disabled=busy>0;
+}
+function carHint(){
+  const on=!!(accessKey&&me);
+  $('cHint').textContent=on?('AI напишет текст слайдов и нарисует обложку и 1–2 иллюстрации: спишется до 3 из '+me.remaining+' генераций'):'Демо: пример из макетов, без AI. Текст слайдов можно править вручную';
+}
+async function carImage(i){
+  const s=car.slides[i];if(!hasImage(s))return;
+  const st=car.images[i]||(car.images[i]={img:null});if(st.running)return;
+  st.running=true;st.error='';st.busy='Рисуем картинку…';carRender(i);carStatus();
+  try{
+    const prompt=s.art.length>=10?s.art:('a visual metaphor for: '+(s.title||$('cTitle').value||'cybersecurity').replace(/\*/g,''));
+    const start=await api('/api/background',{prompt,format:'square',style:s.cover?'cover':'art'});
+    if(me){me.used=start.used;me.remaining=start.remaining;setAccessUi()}
+    st.img=await jobImage(start.job_id);
+  }catch(e){st.error=e.message||'Не получилось'}
+  finally{st.running=false;st.busy='';carRender(i);carStatus()}
+}
+async function carGenerate(){
+  if(!(accessKey&&me)){
+    if(!$('cMarkup').value.trim())$('cMarkup').value=Carousel.DEMO;
+    car.images=[];carParse();car.err='';$('status').textContent='Демо: AI не подключён. Войдите по ключу, чтобы карусель собиралась по брифу';return;
+  }
+  $('cGenerate').disabled=true;car.err='';$('status').textContent='Раскладываем бриф на слайды…';
+  let res;
+  try{res=await api('/api/slides',{brief:$('cBrief').value,title:$('cTitle').value,slides:Number($('cSlides').value)})}
+  catch(e){car.err='✕ '+e.message;carStatus();$('cGenerate').disabled=false;return}
+  $('cMarkup').value=res.markup.trim();try{localStorage.setItem(CAR_STORE,$('cMarkup').value)}catch{}
+  car.caption=res.caption||'';showCaption();car.sample=false;car.images=[];
+  car.slides=Carousel.parse($('cMarkup').value);
+  const want=car.slides.map((s,i)=>hasImage(s)?i:-1).filter(i=>i>=0).slice(0,Math.min(3,me.remaining));
+  want.forEach(i=>{car.images[i]={img:null,busy:'Ждём очереди…'}});
+  carBuild();carStatus();
+  want.forEach((i,k)=>setTimeout(()=>carImage(i),k*400));
+}
+$('cGenerate').addEventListener('click',carGenerate);
+// ---------------------------------------------------------------- переключение «Пост / Карусель»
+let postCaption='';
+function showCaption(){const c=$('mode').value==='carousel'?car.caption:postCaption;$('captionText').textContent=c;$('caption').hidden=!c}
+$('mode').addEventListener('input',()=>{
+  const isCar=$('mode').value==='carousel';
+  $('postForm').hidden=isCar;$('carouselForm').hidden=!isCar;$('gallery').hidden=isCar;cg.hidden=!isCar;
+  $('resultTitle').textContent=isCar?'Слайды':'Варианты';
+  if(isCar&&!car.tiles.length&&!car.slides.length){let saved='';try{saved=localStorage.getItem(CAR_STORE)||''}catch{}$('cMarkup').value=saved||Carousel.DEMO;car.sample=!saved||saved===Carousel.DEMO;carParse()}
+  showCaption();if(isCar)carStatus();else updateStatus();
+  if(!isCar&&!tiles.length){$('status').textContent='Пока пусто';$('downloadAll').disabled=true}
+});
+Carousel.fontsReady().then(carRenderAll);
 $('generate').addEventListener('click',generate);
-$('downloadAll').addEventListener('click',()=>tiles.filter(t=>!t.busy&&!t.error).forEach((t,k)=>setTimeout(()=>download(t.canvas,'post-'+$('format').value+'-'+(k+1)+'.png'),k*300)));
+$('downloadAll').addEventListener('click',()=>$('mode').value==='carousel'?car.tiles.forEach((t,k)=>setTimeout(()=>download(t.canvas,'carousel-'+String(k+1).padStart(2,'0')+'.png'),k*300)):tiles.filter(t=>!t.busy&&!t.error).forEach((t,k)=>setTimeout(()=>download(t.canvas,'post-'+$('format').value+'-'+(k+1)+'.png'),k*300)));
 // Правка заголовка, текста, формата или композиции сразу перерисовывает готовые варианты
 ['headline','brief','format','template','cardText'].forEach(id=>$(id).addEventListener('input',()=>{$('cardField').hidden=$('template').value!=='card';tiles.forEach(render)}));
 Promise.all([document.fonts.load('400 70px "ONY One Beta"'),document.fonts.load('500 30px "ONY One Beta"'),document.fonts.load('400 70px "Golos Text"'),document.fonts.load('500 30px "Golos Text"')]).catch(()=>{}).then(()=>tiles.forEach(render));

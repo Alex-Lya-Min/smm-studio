@@ -151,14 +151,7 @@ Return ONLY a JSON object: {"prompts": ["...", ...], "caption": "..."}.
 - "caption": a short social media caption (1–3 sentences) in the same language as the brief, based ONLY on the brief.
   Do not invent facts, numbers, names or dates.`;
 
-async function claudePlan(env, input) {
-  const user = [
-    `N: ${input.count}`,
-    `Format: ${input.format}`,
-    `Composition type: ${input.template}`,
-    `Headline on the image: ${input.headline || "(none)"}`,
-    `Brief:\n${input.brief || "(empty)"}`,
-  ].join("\n");
+async function claude(env, system, user, maxTokens) {
   const r = await fetch(`${env.ANTHROPIC_API_BASE || "https://api.anthropic.com"}/v1/messages`, {
     method: "POST",
     headers: {
@@ -168,8 +161,8 @@ async function claudePlan(env, input) {
     },
     body: JSON.stringify({
       model: env.CLAUDE_MODEL || "claude-sonnet-5-5",
-      max_tokens: 1500,
-      system: PLAN_SYSTEM,
+      max_tokens: maxTokens,
+      system,
       messages: [{ role: "user", content: user }],
     }),
   });
@@ -179,14 +172,123 @@ async function claudePlan(env, input) {
     throw new HttpError(502, `Claude ответил ошибкой ${r.status}: ${why}`);
   }
   const data = await r.json();
-  const text = (data.content || []).filter((b) => b.type === "text").map((b) => b.text).join("");
+  return (data.content || []).filter((b) => b.type === "text").map((b) => b.text).join("");
+}
+
+async function claudePlan(env, input) {
+  const user = [
+    `N: ${input.count}`,
+    `Format: ${input.format}`,
+    `Composition type: ${input.template}`,
+    `Headline on the image: ${input.headline || "(none)"}`,
+    `Brief:\n${input.brief || "(empty)"}`,
+  ].join("\n");
+  const text = await claude(env, PLAN_SYSTEM, user, 1500);
   const m = text.match(/\{[\s\S]*\}/);
   if (!m) throw new HttpError(502, "Claude вернул неожиданный ответ");
   const plan = JSON.parse(m[0]);
   const prompts = (Array.isArray(plan.prompts) ? plan.prompts : []).map((p) => clip(p, 1200)).filter(Boolean);
   if (!prompts.length) throw new HttpError(502, "Claude не составил промпты");
   while (prompts.length < input.count) prompts.push(prompts[prompts.length % prompts.length]);
-  return { prompts: prompts.slice(0, input.count), caption: clip(plan.caption, 1000), usage: data.usage };
+  return { prompts: prompts.slice(0, input.count), caption: clip(plan.caption, 1000) };
+}
+
+// ----------------------------------------------------------------------------- карусели
+
+const CAROUSEL_EXAMPLE = `# Solar AI Firewall
+> Нейросети — под контролем
+*Защита данных и контроль работы*
+с внешними и внутренними ИИ-сервисами
+@art: a single glowing orange translucent glass keyboard key rising from a row of matte black keys, warm light inside, macro shot, the top third of the frame dark and empty
+===
+# Единые правила работы с ИИ
+> Задавайте правила для сотрудников, подразделений и приложений.
+
+## Например:
+- [Финансистам] Работа с внешними моделями только с маскированием персональных данных.
+- [Разработчикам] Запрет на передачу ключей доступа.
+===
+# Договор — в нейросеть
+> А персональные данные?
+
+*Solar AI Firewall выявляет*
+чувствительные данные в запросах и ответах:
+- персональные данные
+- реквизиты
+- ключи доступа
+
+| По заданным правилам система маскирует данные или блокирует передачу.
+
+*Подозрительные материалы* можно задержать в карантине до решения специалиста ИБ.
+===
+# «Игнорируй предыдущие инструкции»
+> Такая команда может быть попыткой обойти ограничения модели.
+
+*Solar AI Firewall выявляет* попытки подмены инструкций и обхода ограничений, в том числе в передаваемых документах и результатах инструментов.
+
+! При блокирующей политике останавливает обнаруженную атаку
+@art: a stack of floating translucent dark glass document sheets with faint lines, one sheet glowing warm orange
+===
+# Контроль использования ИИ
+## Устанавливайте лимиты
++ на запросы | на токены | на бюджет
+
+Решения системы и сработавшие правила *фиксируются в журнале.*
+
+При настроенной интеграции события и инциденты *можно передавать в SIEM и SOAR.*
+@art: a big orange translucent glass checkmark next to a small dark glass cube with a glowing orange core`;
+
+const SLIDES_SYSTEM = `You write social media carousels for Solar, a cybersecurity company, in a fixed dark design system.
+Code turns your slide markup into 1080x1080 slides, so follow the markup exactly.
+
+MARKUP (one element per line, a blank line separates blocks):
+===               starts the next slide; slide 1 is the cover
+# text            slide title, up to ~45 characters; two consecutive # lines = manual line break
+> text            muted subtitle under the title (optional, up to ~90 characters)
+## text           orange serif accent heading, 1-4 words (for example "Например:" or a product name)
+plain lines       a paragraph; consecutive lines form one paragraph. Wrap 1-5 key words in *asterisks* to color them orange,
+                  at most one orange fragment per paragraph
+- text            checklist item (1-4 words, or one sentence); 2-4 items
+- [Label] text    item with an orange label pill, for "who or what -> rule" pairs; 2-3 items
+| text            glass card for an example, a conclusion or an important note (1-2 sentences)
+! text            warning card with a triangle icon (one short sentence); only on a slide that also has @art
++ a | b | c       a row of 2-4 chips, 1-3 words each
+@art: prompt      a 3D illustration in the lower right of the slide; on the cover it is the full background image
+
+DESIGN RULES
+- Cover: "# product or topic" (it is typeset in capitals), "> short tagline", then a lead paragraph of 1-3 lines
+  whose first line is wrapped in *asterisks*, then "@art: ...". The cover always has @art.
+- Every other slide: one idea, a title and at most ~55 words. Mix 2-3 element types per slide and vary the structure
+  from slide to slide (cards, lists, chips, label pills, accent headings).
+- Use @art on at most 2 slides after the cover; keep text on those slides short, because the image takes the lower right.
+- The last slide sums up or gives a call to action.
+- Write in the language of the brief. Use ONLY facts from the brief: never invent numbers, features, customer names,
+  certifications, prices or dates. If the brief is thin, make fewer slides instead of padding.
+- No emoji and no hashtags on slides.
+
+@art PROMPTS (English, 25-50 words): one hero object or a small group that is a visual metaphor of the slide, cinematic 3D
+render, translucent orange glass and matte black graphite materials, warm glowing orange light, isolated on a plain flat
+dark background, no text. For the cover: a close-up scene that fills the frame, the hero object in the lower right part,
+the top third of the frame dark and calm.
+
+OUTPUT: the markup, then a line with exactly ---CAPTION--- , then a caption for the whole carousel
+(2-4 sentences and up to 3 hashtags, same language, only facts from the brief). No code fences, nothing else.
+
+EXAMPLE OF A GOOD CAROUSEL (style and rhythm reference, do not copy its content):
+${CAROUSEL_EXAMPLE}
+---CAPTION---
+Solar AI Firewall помогает компаниям безопасно работать с нейросетями: правила для сотрудников, маскирование данных и защита от подмены инструкций. #ИИ #кибербезопасность`;
+
+async function claudeSlides(env, input) {
+  const user = [
+    input.slides ? `Slides: exactly ${input.slides}, including the cover` : "Slides: 5-7 including the cover, fewer if the brief is short",
+    input.title ? `Product or topic for the cover: ${input.title}` : "",
+    `Brief:\n${input.brief}`,
+  ].filter(Boolean).join("\n");
+  const text = (await claude(env, SLIDES_SYSTEM, user, 3000)).replace(/^\s*```[a-z]*\s*|\s*```\s*$/g, "");
+  const [markup, caption = ""] = text.split(/^\s*-{3}CAPTION-{3}\s*$/m);
+  if (!/^#\s*\S/m.test(markup || "")) throw new HttpError(502, "Claude вернул неожиданный ответ — попробуйте ещё раз");
+  return { markup: clip(markup, 12000), caption: clip(caption, 1500) };
 }
 
 // ----------------------------------------------------------------------------- Krea
@@ -195,20 +297,42 @@ function kreaBase(env) {
   return env.KREA_API_BASE || "https://api.krea.ai";
 }
 
-// Референсы стиля (рендеры из Figma), через запятую в переменной STYLE_REFS
-function styleRefs(env) {
-  return (env.STYLE_REFS || "").split(",").map((s) => s.trim()).filter((s) => /^https:\/\//.test(s)).slice(0, 4);
+// Референсы стиля (рендеры из Figma), через запятую: STYLE_REFS — посты, CAROUSEL_COVER_REFS / CAROUSEL_ART_REFS — карусели
+function refList(value) {
+  return (value || "").split(",").map((s) => s.trim()).filter((s) => /^https:\/\//.test(s)).slice(0, 4);
 }
 
-async function kreaStart(env, prompt, format) {
-  const refs = styleRefs(env);
+// look — описание стиля; с референсами оно идёт как «повтори стиль, но не объекты», без них — просто как стиль
+const STYLES = {
+  post: {
+    refs: (env) => refList(env.STYLE_REFS),
+    look: "matte graphite and warm orange materials, glowing orange accents, near-black background, soft cinematic light and grain.",
+  },
+  cover: {
+    refs: (env) => refList(env.CAROUSEL_COVER_REFS),
+    look:
+      "cinematic close-up 3D render, matte black and translucent glowing orange glass, dark charcoal background (#1b1e23), " +
+      "shallow depth of field. Keep the top third of the frame dark and calm.",
+  },
+  art: {
+    refs: (env) => refList(env.CAROUSEL_ART_REFS),
+    look:
+      "3D render of translucent orange glass and dark graphite objects. The object is isolated in the center with generous " +
+      "empty margins on a plain flat dark charcoal background (#1b1e23), no floor, no other elements.",
+  },
+};
+
+async function kreaStart(env, prompt, format, style = "post") {
+  const st = STYLES[style] || STYLES.post;
+  const refs = st.refs(env);
   const body = { prompt, aspect_ratio: ASPECT[format] || "1:1", resolution: env.KREA_RESOLUTION || "1K" };
   if (refs.length) {
     body.image_urls = refs;
     body.prompt =
-      "Use the reference images ONLY as a style guide: the same rendering quality, matte graphite and warm orange " +
-      "materials, glowing orange accents, near-black background, soft cinematic light and grain. " +
-      "Do NOT copy their objects or composition — create a new scene: " + prompt;
+      "Use the reference images ONLY as a style guide: the same rendering quality, " + st.look +
+      " Do NOT copy their objects or composition — create a new scene: " + prompt;
+  } else if (style !== "post") {
+    body.prompt = "Style: " + st.look + " Scene: " + prompt;
   }
   const send = (b) =>
     fetch(`${kreaBase(env)}/generate/image/${env.KREA_MODEL || "google/nano-banana-pro"}`, {
@@ -281,8 +405,24 @@ async function route(request, env) {
     return json({ prompts: plan.prompts, caption: plan.caption });
   }
 
+  if (path === "/api/slides" && request.method === "POST") {
+    const body = await readJson(request);
+    const brief = clip(body.brief, 4000);
+    if (brief.length < 20) throw new HttpError(400, "Опишите, о чём карусель — хотя бы пару предложений");
+    const quota = await me.consume("plan", day, user.limit * 3);
+    if (!quota.ok) throw new HttpError(429, "На сегодня лимит запросов исчерпан");
+    const n = Number(body.slides) || 0;
+    const result = await claudeSlides(env, {
+      brief,
+      title: clip(body.title, 120),
+      slides: n ? Math.min(8, Math.max(3, n)) : 0,
+    });
+    return json(result);
+  }
+
   if (path === "/api/background" && request.method === "POST") {
     const body = await readJson(request);
+    const style = STYLES[body.style] ? body.style : "post";
     let prompt = clip(body.prompt, 1500);
     if (prompt.length < 10) throw new HttpError(400, "Пустой промпт");
     if (!prompt.toLowerCase().includes("no text")) prompt += `, ${NO_TEXT}`;
@@ -296,7 +436,7 @@ async function route(request, env) {
       throw new HttpError(429, `Лимит ${user.limit} генераций на сегодня исчерпан`);
     }
     try {
-      const jobId = await kreaStart(env, prompt, format);
+      const jobId = await kreaStart(env, prompt, format, style);
       await me.addJob(jobId);
       return json({ job_id: jobId, used: quota.used, remaining: user.limit - quota.used });
     } catch (err) {

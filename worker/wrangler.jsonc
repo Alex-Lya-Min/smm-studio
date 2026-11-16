@@ -18,7 +18,10 @@
     "KREA_MODEL": "google/nano-banana-pro",
     "KREA_RESOLUTION": "1K",
     // Референсы стиля для Krea (рендеры из Figma, лежат в GitHub Pages)
-    "STYLE_REFS": "https://alex-lya-min.github.io/smm-studio/assets/refs/chips.jpg,https://alex-lya-min.github.io/smm-studio/assets/refs/cubes.jpg,https://alex-lya-min.github.io/smm-studio/assets/refs/box.jpg"
+    "STYLE_REFS": "https://alex-lya-min.github.io/smm-studio/assets/refs/chips.jpg,https://alex-lya-min.github.io/smm-studio/assets/refs/cubes.jpg,https://alex-lya-min.github.io/smm-studio/assets/refs/box.jpg",
+    // Референсы для каруселей: обложка и 3D-иллюстрации на слайдах
+    "CAROUSEL_COVER_REFS": "https://alex-lya-min.github.io/smm-studio/assets/refs/keyboard.jpg",
+    "CAROUSEL_ART_REFS": "https://alex-lya-min.github.io/smm-studio/assets/refs/check3d.jpg,https://alex-lya-min.github.io/smm-studio/assets/refs/sheets.jpg"
   },
   "durable_objects": {
     "bindings": [{ "name": "USAGE", "class_name": "Usage" }]
