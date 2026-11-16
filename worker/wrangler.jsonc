@@ -13,7 +13,7 @@
     // Часовой пояс команды для сброса дневного лимита (Сингапур = 8)
     "TZ_OFFSET_HOURS": "8",
     // Общий лимит генераций фона на всю команду в день
-    "TEAM_DAILY_LIMIT": "30",
+    "TEAM_DAILY_LIMIT": "100",
     "CLAUDE_MODEL": "claude-sonnet-5-5",
     "KREA_MODEL": "google/nano-banana-pro",
     "KREA_RESOLUTION": "1K",
