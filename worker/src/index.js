@@ -120,6 +120,18 @@ function usageStub(env, name) {
   return env.USAGE.get(env.USAGE.idFromName(name));
 }
 
+// Короткая причина ошибки от внешнего сервиса — чтобы в интерфейсе было видно, что именно не так
+async function upstreamReason(r) {
+  let text = "";
+  try {
+    text = await r.text();
+    const j = JSON.parse(text);
+    text = j.error?.message || j.error || j.message || j.detail || text;
+    if (typeof text !== "string") text = JSON.stringify(text);
+  } catch {}
+  return String(text).replace(/\s+/g, " ").slice(0, 180);
+}
+
 // ----------------------------------------------------------------------------- Claude
 
 const PLAN_SYSTEM = `You are the art director of the dark social media style of Solar, a cybersecurity company.
@@ -161,7 +173,11 @@ async function claudePlan(env, input) {
       messages: [{ role: "user", content: user }],
     }),
   });
-  if (!r.ok) throw new HttpError(502, `Claude ответил ошибкой ${r.status}`);
+  if (!r.ok) {
+    const why = await upstreamReason(r);
+    console.error("claude", r.status, why);
+    throw new HttpError(502, `Claude ответил ошибкой ${r.status}: ${why}`);
+  }
   const data = await r.json();
   const text = (data.content || []).filter((b) => b.type === "text").map((b) => b.text).join("");
   const m = text.match(/\{[\s\S]*\}/);
@@ -194,13 +210,24 @@ async function kreaStart(env, prompt, format) {
       "materials, glowing orange accents, near-black background, soft cinematic light and grain. " +
       "Do NOT copy their objects or composition — create a new scene: " + prompt;
   }
-  const r = await fetch(`${kreaBase(env)}/generate/image/${env.KREA_MODEL || "google/nano-banana-pro"}`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${env.KREA_API_TOKEN}`, "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
+  const send = (b) =>
+    fetch(`${kreaBase(env)}/generate/image/${env.KREA_MODEL || "google/nano-banana-pro"}`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${env.KREA_API_TOKEN}`, "Content-Type": "application/json" },
+      body: JSON.stringify(b),
+    });
+  let r = await send(body);
+  // Если Krea не приняла референсы — пробуем ещё раз без них, чтобы пост всё равно собрался
+  if (!r.ok && refs.length && r.status !== 401 && r.status !== 402) {
+    console.error("krea with refs", r.status, await upstreamReason(r));
+    r = await send({ prompt, aspect_ratio: body.aspect_ratio, resolution: body.resolution });
+  }
   if (r.status === 402) throw new HttpError(402, "На балансе Krea API закончились средства");
-  if (!r.ok) throw new HttpError(502, `Krea ответила ошибкой ${r.status}`);
+  if (!r.ok) {
+    const why = await upstreamReason(r);
+    console.error("krea", r.status, why);
+    throw new HttpError(502, `Krea ответила ошибкой ${r.status}: ${why}`);
+  }
   const job = await r.json();
   if (!job.job_id) throw new HttpError(502, "Krea не вернула номер задачи");
   return job.job_id;
