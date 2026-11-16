@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#101117"><title>SMM Studio — прототип</title>
 <style>
+@font-face{font-family:"ONY One Beta";src:local("ONY One Beta"),url(fonts/ony/ONYOneBeta-Regular.woff2) format("woff2");font-weight:400;font-display:block}@font-face{font-family:"ONY One Beta";src:local("ONY One Beta Medium"),url(fonts/ony/ONYOneBeta-Medium.woff2) format("woff2");font-weight:500;font-display:block}@font-face{font-family:"Golos Text";src:url(fonts/fallback/golos-text-cyrillic-400-normal.woff2) format("woff2");font-weight:400;unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}@font-face{font-family:"Golos Text";src:url(fonts/fallback/golos-text-latin-400-normal.woff2) format("woff2");font-weight:400;unicode-range:U+0000-00FF,U+2000-206F}@font-face{font-family:"Golos Text";src:url(fonts/fallback/golos-text-cyrillic-500-normal.woff2) format("woff2");font-weight:500;unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}@font-face{font-family:"Golos Text";src:url(fonts/fallback/golos-text-latin-500-normal.woff2) format("woff2");font-weight:500;unicode-range:U+0000-00FF,U+2000-206F}
 :root{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:#e9e9ee;background:#101117;font-synthesis:none}*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0}button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{opacity:.5;cursor:not-allowed}.shell{max-width:1340px;margin:auto;padding:0 34px 60px}.top{height:80px;border-bottom:1px solid #292b34;display:flex;align-items:center;justify-content:space-between}.brand{display:flex;align-items:center;gap:12px;font-weight:750;font-size:20px;letter-spacing:-.04em}.brandmark{background:#e79d54;color:#19140e;border-radius:12px;width:38px;height:38px;display:grid;place-items:center;font-size:25px}.topright{display:flex;align-items:center;gap:12px;color:#9294a2;font-size:12px}.pill{border:1px solid #3c3d47;border-radius:99px;padding:6px 10px;color:#c6c6d0}.heading{padding:40px 0 28px}.heading h1{font-size:34px;letter-spacing:-.045em;margin:0 0 9px}.muted{color:#9496a6;font-size:14px;line-height:1.55}.layout{display:grid;grid-template-columns:370px 1fr;gap:22px;align-items:start}.panel{background:#191a22;border:1px solid #30313d;border-radius:17px;padding:24px}.panel h2{font-size:16px;margin:0 0 20px}.field{margin:0 0 20px}.field label{display:block;color:#d1d2da;font-size:13px;font-weight:650;margin-bottom:9px}.field textarea,.field input,.field select{display:block;width:100%;background:#101117;border:1px solid #3a3b47;border-radius:9px;padding:12px;color:#f3f3f6;outline:none}.field textarea{min-height:145px;resize:vertical;line-height:1.45}.field textarea:focus,.field input:focus,.field select:focus{border-color:#d49c68}.fields2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.btn{background:#e79d54;border:0;color:#241508;border-radius:10px;padding:13px 15px;font-weight:750}.btn:hover{background:#f6b374}.btn.alt{background:#2d2e39;color:#eee;border:1px solid #41434e}.btn.alt:hover{background:#3c3e4a}.wide{width:100%}.actions{display:flex;gap:10px;flex-wrap:wrap}.hint{font-size:12px;color:#a2a3b0;line-height:1.5;margin:13px 0 0}.resultHead{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:19px}.resultHead h2{margin:0 0 5px;font-size:19px}.status{font-size:12px;color:#a7a9b6}.gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.tile{min-width:0;background:#191a22;border:1px solid #31323d;border-radius:15px;padding:12px}.tile canvas{width:100%;height:auto;display:block;border-radius:9px;background:#111}.tileFooter{padding:13px 3px 2px;display:flex;justify-content:space-between;align-items:center;gap:10px}.tile strong{font-size:13px}.tile span{color:#9496a6;font-size:11px;display:block;margin-top:4px}.small{padding:9px 11px;font-size:12px}.empty{border:1px dashed #3d3f4c;border-radius:16px;min-height:360px;display:grid;align-content:center;justify-items:center;text-align:center;padding:28px}.emptyIcon{font-size:34px;margin-bottom:12px}.empty h3{margin:0 0 5px;font-size:17px}.note{margin-top:18px;padding:13px 16px;border:1px solid #464033;background:#27231e;border-radius:10px;font-size:12px;color:#e0c5a7;line-height:1.5}.caption{margin-top:18px;padding:16px;border:1px solid #30313d;background:#191a22;border-radius:12px}.caption h3{margin:0 0 8px;font-size:14px}.caption p{margin:0 0 12px;font-size:13px;line-height:1.55;color:#d6d7de;white-space:pre-wrap}.pill.on{border-color:#5d8a5f;color:#bfe3c0}@media(max-width:850px){.layout{grid-template-columns:1fr}.shell{padding:0 18px 38px}.heading{padding:28px 0 22px}.heading h1{font-size:29px}}@media(max-width:500px){.gallery{grid-template-columns:1fr}.panel{padding:17px}.topright .pill{display:none}.heading h1{font-size:26px}}
 </style></head>
 <body><div class="shell"><header class="top"><div class="brand"><div class="brandmark">✳</div>SMM Studio</div><div class="topright"><span class="pill">Prototype v0.2</span><span>GitHub Pages</span></div></header>
@@ -10,8 +11,10 @@
 <section class="panel"><h2>Новая публикация</h2>
 <div class="field"><label for="brief">Текст поста или задача</label><textarea id="brief" maxlength="2000" placeholder="О чём рассказываем?">Представляем новые возможности защиты корпоративных данных. Технологии, которые помогают видеть больше и реагировать быстрее.</textarea></div>
 <div class="field"><label for="headline">Заголовок на изображении</label><input id="headline" maxlength="100" value="Данные под защитой" placeholder="Короткий заголовок"></div>
-<div class="fields2"><div class="field"><label for="count">Вариантов</label><select id="count"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option></select></div><div class="field"><label for="format">Формат</label><select id="format"><option value="square">1:1 · Пост</option><option value="wide">16:9 · Баннер</option><option value="story">9:16 · Сторис</option></select></div></div>
-<div class="field"><label for="template">Тип композиции</label><select id="template"><option value="product">Продуктовая новость</option><option value="event">Мероприятие</option><option value="image">Имиджевый пост</option></select></div>
+<div class="fields2"><div class="field"><label for="count">Вариантов</label><select id="count"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option></select></div><div class="field"><label for="format">Формат</label><select id="format"><option value="square">1:1 · Пост 1080×1080</option><option value="story">9:16 · Сторис 1080×1920</option><option value="wide">16:9 · Баннер 1280×720</option></select></div></div>
+<div class="field"><label for="template">Макет</label><select id="template"><option value="cover">Обложка — заголовок сверху</option><option value="caps">Обложка — заголовок капсом снизу</option><option value="card">Карточка — блоки текста</option></select></div><div class="field" id="cardField" hidden><label for="cardText">Текст на карточке</label><textarea id="cardText" maxlength="1200" style="min-height:120px" placeholder="Ситуация: что произошло&#10;&#10;Решение: как помогает продукт">Ситуация: Нейросеть присылает документ со скрытым вредоносным макросом.
+
+Решение: Solar webProxy проверяет файлы и блокирует опасные ответы нейросети.</textarea></div>
 <button id="generate" class="btn wide">✳ Создать варианты</button><p class="hint" id="genHint">Демо-режим: фон рисуется программно. Войдите с ключом, чтобы фон делал AI.</p>
 </section>
 <section><div class="resultHead"><div><h2>Результаты</h2><div class="status" id="status">Здесь появятся варианты публикации</div></div><button id="downloadAll" class="btn alt small" disabled>Скачать все PNG</button></div><div id="gallery" class="gallery"><div class="empty"><div class="emptyIcon">✳</div><h3>Всё готово к старту</h3><div class="muted">Заполните бриф и нажмите «Создать варианты».</div></div></div><div id="caption" class="caption" hidden><h3>Подпись к посту</h3><p id="captionText"></p><button type="button" class="btn alt small" id="copyCaption">Копировать</button></div><div class="note" id="note">Демо-режим: изображения создаются программно прямо в браузере. Текст и изображения не отправляются на сервер. Результаты не сохраняются после закрытия страницы.</div></section>
@@ -59,31 +62,55 @@ $('copyCaption').addEventListener('click',()=>{navigator.clipboard?.writeText($(
 
 // ---------------------------------------------------------------- отрисовка
 let tiles=[],seed=1;
-const formatSizes={square:[1080,1080],wide:[1280,720],story:[720,1280]};
-function random(n){let x=Math.sin(n*123.33+0.918)*43758.5453;return x-Math.floor(x)}
-function roundRect(ctx,x,y,w,h,r,fill){ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fillStyle=fill;ctx.fill()}
-function wrap(ctx,text,maxWidth,maxLines){const words=text.trim().split(/\s+/);let lines=[],line='';for(const word of words){const test=line?line+' '+word:word;if(ctx.measureText(test).width>maxWidth&&line){lines.push(line);line=word}else{line=test}}if(line)lines.push(line);if(lines.length>maxLines){lines=lines.slice(0,maxLines);let last=lines.length-1;while(lines[last].length>2&&ctx.measureText(lines[last]+'…').width>maxWidth)lines[last]=lines[last].slice(0,-1);lines[last]+='…'}return lines}
-function drawCover(c,img,w,h){const s=Math.max(w/img.width,h/img.height),iw=img.width*s,ih=img.height*s;c.drawImage(img,(w-iw)/2,(h-ih)/2,iw,ih)}
+// ---------------------------------------------------------------- стиль Solar (тёмные посты из Figma TEST-SMM)
+const formatSizes={square:[1080,1080],wide:[1280,720],story:[1080,1920]};
+const ORANGE='#FE6E36',BLACK='#0E0E0E',FONT='"ONY One Beta","Golos Text",Arial,sans-serif';
+const logo=new Image();logo.src='assets/solar-logo.svg';
+const refs=['chips','cubes','box'].map(n=>{const i=new Image();i.src='assets/refs/'+n+'.jpg';return i});
+function wrap(ctx,text,maxWidth){const out=[];for(const para of String(text).split(/\n/)){const words=para.trim().split(/\s+/).filter(Boolean);let line='';for(const word of words){const test=line?line+' '+word:word;if(ctx.measureText(test).width>maxWidth&&line){out.push(line);line=word}else line=test}if(line)out.push(line)}return out}
+// Подбирает кегль, чтобы текст влез в заданное число строк (как автоуменьшение в макетах)
+function fitText(c,text,{size,min,weight,maxWidth,maxLines,lh}){for(let s=size;s>=min;s-=2){c.font=weight+' '+s+'px '+FONT;const lines=wrap(c,text,maxWidth);if(lines.length<=maxLines)return{lines,size:s,line:s*lh}}c.font=weight+' '+min+'px '+FONT;return{lines:wrap(c,text,maxWidth).slice(0,maxLines),size:min,line:min*lh}}
+function drawCover(c,img,w,h,focus){const s=Math.max(w/img.width,h/img.height),iw=img.width*s,ih=img.height*s;c.drawImage(img,(w-iw)/2,(h-ih)*(focus??.5),iw,ih)}
+function shade(c,w,h,from,to,y0,y1){const g=c.createLinearGradient(0,y0,0,y1);g.addColorStop(0,from);g.addColorStop(1,to);c.fillStyle=g;c.fillRect(0,Math.min(y0,y1),w,Math.abs(y1-y0))}
+// «Заголовок: текст» по абзацам → блоки карточки
+function cardBlocks(){const raw=$('cardText').value.trim();if(!raw)return[{label:$('headline').value.trim(),text:$('brief').value.trim()}];return raw.split(/\n\s*\n|\n(?=[^\n:]{1,40}:)/).map(p=>{const m=p.match(/^\s*([^:\n]{1,40}):\s*([\s\S]*)$/);return m?{label:m[1].trim(),text:m[2].trim()}:{label:'',text:p.trim()}}).filter(b=>b.label||b.text).slice(0,3)}
+
 function render(t){
-const canvas=t.canvas,i=t.i,v=t.v;const [w,h]=formatSizes[$('format').value];canvas.width=w;canvas.height=h;const c=canvas.getContext('2d');
-const accent=['#fa994f','#55a9fa','#cc8aff','#f2b75f','#6bd9c4'][i%5],unit=Math.min(w,h);
-if(t.bg){drawCover(c,t.bg,w,h)}else{
-const base=c.createLinearGradient(0,0,w,h);base.addColorStop(0,'#121b36');base.addColorStop(0.52,'#122447');base.addColorStop(1,'#071020');c.fillStyle=base;c.fillRect(0,0,w,h);
-const cx=w*(.73+.04*random(v)),cy=h*.55;
-for(let j=0;j<14;j++){let a=j*2.399+v*0.23;let radius=unit*(.08+j*.026),x=cx+Math.cos(a)*unit*.17,y=cy+Math.sin(a)*unit*.22;const g=c.createRadialGradient(x,y,0,x,y,radius);g.addColorStop(0,j%3===0?accent:'#437ab9');g.addColorStop(1,'transparent');c.save();c.globalAlpha=.09+(j%5)*.025;c.fillStyle=g;c.beginPath();c.arc(x,y,radius,0,Math.PI*2);c.fill();c.restore()}
-c.save();c.translate(cx,cy);c.rotate(-.35+random(v+8)*.6);for(let j=0;j<9;j++){let r=unit*(.13+j*.039);c.beginPath();c.ellipse(0,0,r,r*.43,j*.18,0,Math.PI*2);c.strokeStyle=j%3===0?accent:'#6c94d3';c.globalAlpha=.65-j*.052;c.lineWidth=4+j*.6;c.stroke()}c.restore();}
-const shaded=c.createLinearGradient(0,0,w*.88,0);shaded.addColorStop(0,'rgba(4,10,24,.92)');shaded.addColorStop(.72,'rgba(4,10,24,.5)');shaded.addColorStop(1,'transparent');c.fillStyle=shaded;c.fillRect(0,0,w,h);
-const pad=w*.07,top=h*.095;roundRect(c,pad,top,Math.max(8,w*.012),unit*.075,5,accent);
-c.fillStyle='#d2deef';c.font='600 '+Math.round(unit*.022)+'px Arial';c.fillText('SMM STUDIO  /  VISUAL CONCEPT',pad+unit*.025,top+unit*.035);
-const template=$('template').value;let title=$('headline').value.trim()||'Новый визуал';if(template==='event')title=title.toUpperCase();
-let fontSize=Math.round(unit*(w/h>1.4?.064:.072));c.font='bold '+fontSize+'px Arial';let lines=wrap(c,title,w*.65,4);if(lines.length>3){fontSize*=.82;c.font='bold '+fontSize+'px Arial';lines=wrap(c,title,w*.68,4)}
-let start=Math.max(top+unit*.18,h*.43-lines.length*fontSize*.55);c.fillStyle='#ffffff';for(const [k,line] of lines.entries())c.fillText(line,pad,start+k*fontSize*1.14);
-const text=$('brief').value.trim();if(text){c.font=Math.round(unit*.024)+'px Arial';let desc=wrap(c,text,w*.61,3);c.fillStyle='#becde0';let y=start+lines.length*fontSize*1.14+unit*.05;for(const l of desc){if(y<h*.81)c.fillText(l,pad,y);y+=unit*.035}}
-c.fillStyle='#dae7f4';c.font='bold '+Math.round(unit*.027)+'px Arial';c.fillText((t.ai?'AI':'DEMO')+' / '+String(i+1).padStart(2,'0'),pad,h-unit*.07);
-c.fillStyle=accent;c.fillRect(pad,h-unit*.052,unit*.15,unit*.006);
-if(t.busy||t.error){c.fillStyle='rgba(16,17,23,.62)';c.fillRect(0,0,w,h);c.fillStyle=t.error?'#f3b4b4':'#f3f3f6';c.font='600 '+Math.round(unit*.034)+'px Arial';c.textAlign='center';
- const msg=t.error||t.busy;const ls=wrap(c,msg,w*.8,3);ls.forEach((l,k)=>c.fillText(l,w/2,h/2+(k-(ls.length-1)/2)*unit*.05));c.textAlign='left'}
+const canvas=t.canvas;const fmt=$('format').value;const [w,h]=formatSizes[fmt];canvas.width=w;canvas.height=h;const c=canvas.getContext('2d');
+const s=Math.min(w,h)/1080,m=48*s,layout=$('template').value;
+c.fillStyle=BLACK;c.fillRect(0,0,w,h);
+const img=t.bg||(refs[(t.i+seed)%refs.length].complete?refs[(t.i+seed)%refs.length]:null);
+if(img&&img.width){drawCover(c,img,w,h,layout==='caps'?.35:.75)}
+c.textBaseline='top';
+if(layout==='cover'){
+  // Обложка: логотип, крупный заголовок сверху, рендер снизу
+  shade(c,w,h,'rgba(14,14,14,.95)','rgba(14,14,14,0)',0,h*.5);
+  drawLogo(c,m,m,s);
+  const t1=fitText(c,$('headline').value.trim()||'Заголовок поста',{size:Math.round(70*s),min:Math.round(44*s),weight:400,maxWidth:w-2*m-30*s,maxLines:4,lh:1.0});
+  c.fillStyle='#fff';t1.lines.forEach((l,k)=>c.fillText(l,m,188*s+k*t1.line));
+}else if(layout==='caps'){
+  // Заголовок капсом внизу, рендер сверху
+  shade(c,w,h,'rgba(14,14,14,0)','rgba(14,14,14,.96)',h*.5,h);
+  drawLogo(c,m,m,s);
+  const t1=fitText(c,($('headline').value.trim()||'Заголовок поста').toUpperCase(),{size:Math.round(80*s),min:Math.round(48*s),weight:400,maxWidth:w*.82,maxLines:4,lh:1.0});
+  c.fillStyle='#fff';const top=h-58*s-t1.lines.length*t1.line;t1.lines.forEach((l,k)=>c.fillText(l,m,top+k*t1.line));
+}else{
+  // Карточка: блоки «Ситуация / Решение» с оранжевыми подзаголовками и линией слева
+  shade(c,w,h,'rgba(0,0,0,.96)','rgba(0,0,0,0)',0,h*.62);
+  const x=83*s,maxW=w-x-84*s;let y=49*s;
+  for(const b of cardBlocks()){
+    const y0=y;
+    if(b.label){c.font='500 '+Math.round(30*s)+'px '+FONT;c.fillStyle=ORANGE;c.fillText(b.label,x,y);y+=48*s}
+    c.font='400 '+Math.round(30*s)+'px '+FONT;c.fillStyle='#fff';
+    const lines=wrap(c,b.text,maxW).slice(0,6);lines.forEach((l,k)=>c.fillText(l,x,y+k*33*s));y+=lines.length*33*s;
+    c.fillStyle='rgba(255,255,255,.55)';c.fillRect(45*s-1*s,y0+6*s,2*s,Math.max(10*s,y-y0-10*s));
+    y+=80*s;
+  }
 }
+if(t.busy||t.error){c.fillStyle='rgba(14,14,14,.66)';c.fillRect(0,0,w,h);c.fillStyle=t.error?'#f3b4b4':'#fff';c.font='500 '+Math.round(34*s)+'px '+FONT;c.textAlign='center';c.textBaseline='middle';
+ const ls=wrap(c,t.error||t.busy,w*.8).slice(0,3);ls.forEach((l,k)=>c.fillText(l,w/2,h/2+(k-(ls.length-1)/2)*48*s));c.textAlign='left';c.textBaseline='top'}
+}
+function drawLogo(c,x,y,s){if(logo.complete&&logo.naturalWidth)c.drawImage(logo,x,y,246*s,48*s)}
 function download(canvas,name){canvas.toBlob(blob=>{if(!blob)return;let a=document.createElement('a');let url=URL.createObjectURL(blob);a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),3000)},'image/png')}
 
 // ---------------------------------------------------------------- генерация фона через API
@@ -136,7 +163,9 @@ async function generate(){
 $('generate').addEventListener('click',generate);
 $('downloadAll').addEventListener('click',()=>tiles.filter(t=>!t.busy&&!t.error).forEach((t,k)=>setTimeout(()=>download(t.canvas,'smm-post-'+(t.i+1)+'.png'),k*300)));
 // Правка заголовка, текста, формата или композиции сразу перерисовывает готовые варианты
-['headline','brief','format','template'].forEach(id=>$(id).addEventListener('input',()=>tiles.forEach(render)));
+['headline','brief','format','template','cardText'].forEach(id=>$(id).addEventListener('input',()=>{$('cardField').hidden=$('template').value!=='card';tiles.forEach(render)}));
+Promise.all([document.fonts.load('400 70px "ONY One Beta"'),document.fonts.load('500 30px "ONY One Beta"'),document.fonts.load('400 70px "Golos Text"'),document.fonts.load('500 30px "Golos Text"')]).catch(()=>{}).then(()=>tiles.forEach(render));
+[logo,...refs].forEach(i=>i.addEventListener('load',()=>tiles.forEach(render)));
 
 setAccessUi();refreshMe();
 })();

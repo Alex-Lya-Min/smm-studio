@@ -122,17 +122,20 @@ function usageStub(env, name) {
 
 // ----------------------------------------------------------------------------- Claude
 
-const PLAN_SYSTEM = `You are an art director for social media posts of a B2B technology company.
-You get a post brief, the headline that will be placed on the image, the composition type and the format.
-Write prompts for an image model that will generate ONLY the BACKGROUND of the post. The headline will be typeset on top
-in the LEFT part of the image, so the left ~45% must stay calm, dark and uncluttered.
+const PLAN_SYSTEM = `You are the art director of the dark social media style of Solar, a cybersecurity company.
+The brand look: near-black background (#0E0E0E), cinematic 3D renders of abstract technology objects (cubes, chips,
+server blocks, boxes, shields, data streams, globes) made of matte graphite and warm orange materials, glowing orange
+#FE6E36 light accents, soft volumetric light, subtle film grain, lots of empty black space. Isometric or 3/4 view.
+You get a post brief, the headline that will be typeset on the image, the layout and the format.
+Write prompts for an image model that will generate ONLY the BACKGROUND render. Text is added later by code.
 Return ONLY a JSON object: {"prompts": ["...", ...], "caption": "..."}.
-- "prompts": exactly N distinct prompts in English, 40–80 words each: subject, composition, light, palette, mood.
-  Make the variants clearly different (different subject or metaphor, not just different colours).
-  Default palette: deep navy and graphite with warm orange or soft blue accent light; premium, cinematic, modern tech.
-  Composition type hints: "product" — a clear product/technology metaphor; "event" — people, stage, venue or gathering
-  atmosphere; "image" — abstract brand mood.
-  Every prompt MUST end with: "${NO_TEXT}, no screens with readable UI".
+- "prompts": exactly N distinct prompts in English, 40–80 words each: one clear hero object or small group that is
+  a visual metaphor of the brief, materials, light, camera angle. Make the variants different metaphors.
+  Respect the empty zone required by the layout:
+    "cover" — headline sits in the TOP 40% of the frame: keep the top 40% pure black and empty, objects in the lower part;
+    "caps"  — headline sits in the BOTTOM 30%: keep the bottom 30% dark and empty, objects in the upper and middle part;
+    "card"  — text blocks fill the TOP-LEFT half: keep the top half dark and calm, objects in the lower right.
+  Every prompt MUST end with: "${NO_TEXT}, no screens with readable UI, no people".
 - "caption": a short social media caption (1–3 sentences) in the same language as the brief, based ONLY on the brief.
   Do not invent facts, numbers, names or dates.`;
 
@@ -176,8 +179,21 @@ function kreaBase(env) {
   return env.KREA_API_BASE || "https://api.krea.ai";
 }
 
+// Референсы стиля (рендеры из Figma), через запятую в переменной STYLE_REFS
+function styleRefs(env) {
+  return (env.STYLE_REFS || "").split(",").map((s) => s.trim()).filter((s) => /^https:\/\//.test(s)).slice(0, 4);
+}
+
 async function kreaStart(env, prompt, format) {
+  const refs = styleRefs(env);
   const body = { prompt, aspect_ratio: ASPECT[format] || "1:1", resolution: env.KREA_RESOLUTION || "1K" };
+  if (refs.length) {
+    body.image_urls = refs;
+    body.prompt =
+      "Use the reference images ONLY as a style guide: the same rendering quality, matte graphite and warm orange " +
+      "materials, glowing orange accents, near-black background, soft cinematic light and grain. " +
+      "Do NOT copy their objects or composition — create a new scene: " + prompt;
+  }
   const r = await fetch(`${kreaBase(env)}/generate/image/${env.KREA_MODEL || "google/nano-banana-pro"}`, {
     method: "POST",
     headers: { Authorization: `Bearer ${env.KREA_API_TOKEN}`, "Content-Type": "application/json" },
@@ -230,7 +246,7 @@ async function route(request, env) {
     const input = {
       count: Math.min(5, Math.max(1, Number(body.count) || 1)),
       format: ASPECT[body.format] ? body.format : "square",
-      template: ["product", "event", "image"].includes(body.template) ? body.template : "image",
+      template: ["cover", "caps", "card"].includes(body.template) ? body.template : "cover",
       headline: clip(body.headline, 120),
       brief: clip(body.brief, 2000),
     };
