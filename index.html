@@ -109,6 +109,14 @@ font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;c
     <button type="button" data-set="mode" data-value="carousel" aria-pressed="false">Карусель</button>
   </div>
   <input type="hidden" id="mode" value="post">
+  <div class="field" id="aiPick" style="margin-bottom:24px" hidden>
+    <label>Нейросеть для текста <small>картинки всё равно рисует Krea</small></label>
+    <div class="seg" role="group" aria-label="Нейросеть для текста">
+      <button type="button" data-set="ai" data-value="claude" aria-pressed="true">Claude</button>
+      <button type="button" data-set="ai" data-value="kimi" aria-pressed="false">Kimi</button>
+    </div>
+    <input type="hidden" id="ai" value="claude">
+  </div>
   <div id="postForm">
   <div class="step">
     <h2 class="stepTitle"><span>1</span>Текст</h2>
@@ -228,7 +236,15 @@ async function api(path,body){
   if(!r.ok){let msg='Ошибка '+r.status;try{msg=(await r.json()).error||msg}catch{}if(r.status===401)logout(msg);throw new ApiError(r.status,msg)}
   return path.startsWith('/api/image/')?r.blob():r.json();
 }
+// Переключатель нейросети виден, только если на сервере подключено больше одной
+function syncAi(){
+  const list=(me&&me.ai)||['claude'],pick=$('aiPick');pick.hidden=!(accessKey&&me&&list.length>1);
+  let v='claude';try{v=localStorage.getItem('smm-studio-ai')||'claude'}catch{}
+  if(!list.includes(v))v='claude';
+  $('ai').value=v;pick.querySelectorAll('[data-set=ai]').forEach(b=>{b.setAttribute('aria-pressed',String(b.dataset.value===v));b.hidden=!list.includes(b.dataset.value)});
+}
 function setAccessUi(){
+  syncAi();
   const on=!!(accessKey&&me);
   $('keyForm').hidden=on;$('logout').hidden=!on;
   $('accessPill').className='chip'+(on?' on':'');
@@ -326,7 +342,7 @@ async function generate(){
   if(me.remaining<count){$('status').textContent='На сегодня осталось генераций: '+me.remaining+'. Выберите меньше вариантов.';return}
   $('generate').disabled=true;$('status').textContent='Подбираем картинки под ваш текст…';
   let plan;
-  try{plan=await api('/api/plan',{brief:$('brief').value,headline:$('headline').value,template:$('template').value,format:$('format').value,count})}
+  try{plan=await api('/api/plan',{ai:$('ai').value,brief:$('brief').value,headline:$('headline').value,template:$('template').value,format:$('format').value,count})}
   catch(e){$('status').textContent='✕ '+e.message;$('generate').disabled=false;return}
   postCaption=plan.caption||'';showCaption();
   tiles=plan.prompts.map((p,i)=>makeTile(i,p));updateStatus();
@@ -402,7 +418,7 @@ async function carGenerate(){
   }
   $('cGenerate').disabled=true;$('cFixBtn').disabled=true;car.err='';$('status').textContent='Раскладываем бриф на слайды…';
   let res;
-  try{res=await api('/api/slides',{brief:$('cBrief').value,title:$('cTitle').value,slides:Number($('cSlides').value)})}
+  try{res=await api('/api/slides',{ai:$('ai').value,brief:$('cBrief').value,title:$('cTitle').value,slides:Number($('cSlides').value)})}
   catch(e){car.err='✕ '+e.message;carStatus();$('cGenerate').disabled=false;$('cFixBtn').disabled=false;return}
   $('cMarkup').value=res.markup.trim();try{localStorage.setItem(CAR_STORE,$('cMarkup').value)}catch{}
   car.caption=res.caption||'';showCaption();car.sample=false;car.images=[];
@@ -417,7 +433,7 @@ async function carFix(){
   const instruction=$('cFix').value.trim();if(!instruction){$('cFix').focus();return}
   $('cFixBtn').disabled=true;$('cGenerate').disabled=true;car.err='';$('status').textContent='Правим карусель…';
   let res;
-  try{res=await api('/api/slides',{instruction,markup:$('cMarkup').value,brief:$('cBrief').value})}
+  try{res=await api('/api/slides',{ai:$('ai').value,instruction,markup:$('cMarkup').value,brief:$('cBrief').value})}
   catch(e){car.err='✕ '+e.message;$('cFixBtn').disabled=false;carStatus();return}
   const old=car.slides,oldImgs=car.images,hadAi=oldImgs.some(Boolean);
   $('cMarkup').value=res.markup.trim();try{localStorage.setItem(CAR_STORE,$('cMarkup').value)}catch{}
@@ -453,6 +469,7 @@ function syncPostText(){const d=POST_TEXT[$('template').value],ta=$('cardText');
 $('template').addEventListener('input',syncPostText);syncPostText();
 ['headline','subtitle','brief','format','template','cardText'].forEach(id=>$(id).addEventListener('input',()=>tiles.forEach(render)));
 Carousel.fontsReady().then(()=>tiles.forEach(render));
+$('ai').addEventListener('input',()=>{try{localStorage.setItem('smm-studio-ai',$('ai').value)}catch{}});
 // Настройка логотипа запоминается в браузере
 [['logo','smm-studio-logo'],['cLogo','smm-studio-clogo']].forEach(([id,key])=>{try{$(id).checked=localStorage.getItem(key)==='1'}catch{}$(id).addEventListener('change',()=>{try{localStorage.setItem(key,$(id).checked?'1':'0')}catch{}tiles.forEach(render);carRenderAll()})});
 

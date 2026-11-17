@@ -1,5 +1,5 @@
 // SMM Studio API — Cloudflare Worker.
-// Хранит ключи Claude и Krea, проверяет ключ доступа сотрудника, считает дневной лимит генераций
+// Хранит ключи Claude, Kimi и Krea, проверяет ключ доступа сотрудника, считает дневной лимит генераций
 // и проксирует запросы. Тяжёлой работы здесь нет: вёрстка текста делается в браузере.
 
 import { DurableObject } from "cloudflare:workers";
@@ -148,6 +148,44 @@ Return ONLY a JSON object: {"prompts": ["...", ...], "caption": "..."}.
 - "caption": a short social media caption (1-3 sentences) in the same language as the brief, based ONLY on the brief.
   Do not invent facts, numbers, names or dates.`;
 
+// ----------------------------------------------------------------------------- выбор нейросети
+// Текст и промпты может писать Claude или Kimi (Moonshot). Kimi включается, когда задан секрет MOONSHOT_API_KEY.
+const AI_NAMES = { claude: "Claude", kimi: "Kimi" };
+function providers(env) {
+  return ["claude", ...(env.MOONSHOT_API_KEY ? ["kimi"] : [])];
+}
+function pickAi(env, value) {
+  return providers(env).includes(value) ? value : "claude";
+}
+async function llm(env, ai, system, user, maxTokens) {
+  return ai === "kimi" ? kimi(env, system, user, maxTokens) : claude(env, system, user, maxTokens);
+}
+
+// Kimi: OpenAI-совместимый Chat Completions на api.moonshot.ai
+async function kimi(env, system, user, maxTokens) {
+  const r = await fetch(`${env.KIMI_API_BASE || "https://api.moonshot.ai"}/v1/chat/completions`, {
+    method: "POST",
+    headers: { authorization: `Bearer ${env.MOONSHOT_API_KEY}`, "content-type": "application/json" },
+    body: JSON.stringify({
+      model: env.KIMI_MODEL || "kimi-k3.1-pro",
+      // Модели K3 сначала «думают», и эти токены тоже идут в лимит ответа — даём запас
+      max_completion_tokens: maxTokens * 4,
+      messages: [
+        { role: "system", content: system },
+        { role: "user", content: user },
+      ],
+    }),
+  });
+  if (!r.ok) {
+    const why = await upstreamReason(r);
+    console.error("kimi", r.status, why);
+    throw new HttpError(502, `Kimi ответил ошибкой ${r.status}: ${why}`);
+  }
+  const data = await r.json();
+  const text = ((data.choices || [])[0] || {}).message?.content || "";
+  return String(text).replace(/<think>[\s\S]*?<\/think>/g, "").trim();
+}
+
 async function claude(env, system, user, maxTokens) {
   const r = await fetch(`${env.ANTHROPIC_API_BASE || "https://api.anthropic.com"}/v1/messages`, {
     method: "POST",
@@ -173,6 +211,7 @@ async function claude(env, system, user, maxTokens) {
 }
 
 async function claudePlan(env, input) {
+  const name = AI_NAMES[input.ai];
   const user = [
     `N: ${input.count}`,
     `Format: ${input.format}`,
@@ -180,12 +219,12 @@ async function claudePlan(env, input) {
     `Headline on the image: ${input.headline || "(none)"}`,
     `Brief:\n${input.brief || "(empty)"}`,
   ].join("\n");
-  const text = await claude(env, PLAN_SYSTEM, user, 1500);
+  const text = await llm(env, input.ai, PLAN_SYSTEM, user, 1500);
   const m = text.match(/\{[\s\S]*\}/);
-  if (!m) throw new HttpError(502, "Claude вернул неожиданный ответ");
+  if (!m) throw new HttpError(502, `${name} вернул неожиданный ответ — попробуйте ещё раз`);
   const plan = JSON.parse(m[0]);
   const prompts = (Array.isArray(plan.prompts) ? plan.prompts : []).map((p) => clip(p, 1200)).filter(Boolean);
-  if (!prompts.length) throw new HttpError(502, "Claude не составил промпты");
+  if (!prompts.length) throw new HttpError(502, `${name} не составил промпты`);
   while (prompts.length < input.count) prompts.push(prompts[prompts.length % prompts.length]);
   return { prompts: prompts.slice(0, input.count), caption: clip(plan.caption, 1000) };
 }
@@ -306,9 +345,9 @@ async function claudeSlides(env, input) {
         input.title ? `Product or topic for the cover: ${input.title}` : "",
         `Brief:\n${input.brief}`,
       ].filter(Boolean).join("\n");
-  const text = (await claude(env, SLIDES_SYSTEM, user, 4500)).replace(/^\s*```[a-z]*\s*|\s*```\s*$/g, "");
+  const text = (await llm(env, input.ai, SLIDES_SYSTEM, user, 4500)).replace(/^\s*```[a-z]*\s*|\s*```\s*$/g, "");
   const [markup, caption = ""] = text.split(/^\s*-{3}CAPTION-{3}\s*$/m);
-  if (!/^#\s*\S/m.test(markup || "")) throw new HttpError(502, "Claude вернул неожиданный ответ — попробуйте ещё раз");
+  if (!/^#\s*\S/m.test(markup || "")) throw new HttpError(502, `${AI_NAMES[input.ai]} вернул неожиданный ответ — попробуйте ещё раз`);
   return { markup: clip(markup, 15000), caption: clip(caption, 1500) };
 }
 
@@ -404,7 +443,7 @@ async function route(request, env) {
 
   if (path === "/api/me" && request.method === "GET") {
     const used = await me.used("gen", day);
-    return json({ name: user.name, limit: user.limit, used, remaining: Math.max(0, user.limit - used), day });
+    return json({ name: user.name, limit: user.limit, used, remaining: Math.max(0, user.limit - used), day, ai: providers(env) });
   }
 
   if (path === "/api/plan" && request.method === "POST") {
@@ -418,6 +457,7 @@ async function route(request, env) {
       template: ["cover", "art", "card"].includes(body.template) ? body.template : "cover",
       headline: clip(body.headline, 120),
       brief: clip(body.brief, 2000),
+      ai: pickAi(env, body.ai),
     };
     const plan = await claudePlan(env, input);
     return json({ prompts: plan.prompts, caption: plan.caption });
@@ -439,6 +479,7 @@ async function route(request, env) {
       slides: n ? Math.min(10, Math.max(3, n)) : 0,
       instruction,
       markup,
+      ai: pickAi(env, body.ai),
     });
     return json(result);
   }

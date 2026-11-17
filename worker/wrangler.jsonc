@@ -15,6 +15,8 @@
     // Общий лимит генераций фона на всю команду в день
     "TEAM_DAILY_LIMIT": "100",
     "CLAUDE_MODEL": "claude-sonnet-5-5",
+    // Модель Kimi (Moonshot) — работает, если задан секрет MOONSHOT_API_KEY
+    "KIMI_MODEL": "kimi-k3.1-pro",
     "KREA_MODEL": "google/nano-banana-pro",
     "KREA_RESOLUTION": "1K",
     // Референсы стиля для Krea (рендеры из Figma, лежат в GitHub Pages): обложки и 3D-иллюстрации

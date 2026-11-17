@@ -43,3 +43,13 @@ GitHub Secrets (Settings → Secrets and variables → Actions):
 - `limit` — генераций фона в день на человека (сброс в полночь по Сингапуру, `TZ_OFFSET_HOURS`).
 - `TEAM_DAILY_LIMIT` в `wrangler.jsonc` — общий потолок на команду.
 - Запросов к Claude — не больше `limit × 3` в день.
+
+## Kimi (необязательно)
+
+Текст и промпты может писать не только Claude, но и Kimi от Moonshot AI. Чтобы включить:
+
+1. Ключ на https://platform.kimi.ai → API Keys (баланс пополняется заранее).
+2. GitHub → Settings → Secrets and variables → Actions → New secret `MOONSHOT_API_KEY`.
+3. Actions → Deploy API → Run workflow.
+
+После этого в студии появится переключатель «Нейросеть для текста: Claude / Kimi». Модель задаётся в `wrangler.jsonc` (`KIMI_MODEL`, по умолчанию `kimi-k3.1-pro`).
