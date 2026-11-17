@@ -236,6 +236,51 @@ async function api(path,body){
   if(!r.ok){let msg='Ошибка '+r.status;try{msg=(await r.json()).error||msg}catch{}if(r.status===401)logout(msg);throw new ApiError(r.status,msg)}
   return path.startsWith('/api/image/')?r.blob():r.json();
 }
+// Запрос к нейросети с живым статусом: сколько секунд ждём, а у Kimi — «думает / пишет»
+async function aiCall(path,body,label,kind){
+  const name=body.ai==='kimi'?'Kimi':'Claude',t0=Date.now();let phase='';
+  const show=()=>{$('status').textContent=label+' · '+name+(phase?' '+phase:'')+' · '+Math.round((Date.now()-t0)/1000)+' с'};
+  show();const timer=setInterval(show,1000);
+  const ctrl=new AbortController(),kill=setTimeout(()=>ctrl.abort(),300000);
+  const lost=()=>new ApiError(0,ctrl.signal.aborted?name+' не ответил за 5 минут — попробуйте ещё раз':'Связь с '+name+' прервалась — попробуйте ещё раз');
+  try{
+    let r;try{r=await fetch(API+path,{method:'POST',headers:{'X-Access-Key':accessKey,'Content-Type':'application/json'},body:JSON.stringify(body),signal:ctrl.signal})}catch{throw lost()}
+    if(!r.ok){let msg='Ошибка '+r.status;try{msg=(await r.json()).error||msg}catch{}if(r.status===401)logout(msg);throw new ApiError(r.status,msg)}
+    if(!(r.headers.get('content-type')||'').includes('event-stream'))return await r.json();
+    // Ответ Kimi идёт потоком (SSE): сначала рассуждения, потом сам текст
+    const reader=r.body.getReader(),dec=new TextDecoder();let buf='',text='';phase='думает';show();
+    for(;;){
+      let chunk;try{chunk=await reader.read()}catch{throw lost()}
+      if(chunk.done)break;
+      buf+=dec.decode(chunk.value,{stream:true});
+      let i;while((i=buf.indexOf('\n'))>=0){
+        const line=buf.slice(0,i).trim();buf=buf.slice(i+1);
+        if(!line.startsWith('data:'))continue;const data=line.slice(5).trim();if(data==='[DONE]')continue;
+        let ev;try{ev=JSON.parse(data)}catch{continue}
+        if(ev.error)throw new ApiError(502,name+': '+(ev.error.message||'ошибка'));
+        const d=(ev.choices&&ev.choices[0]&&ev.choices[0].delta)||{};
+        if(d.content){text+=d.content;phase='пишет · '+text.length+' знаков'}
+      }
+    }
+    if(!text.trim())throw new ApiError(502,name+' ничего не ответил — попробуйте ещё раз');
+    text=text.replace(/<think>[\s\S]*?<\/think>/g,'');
+    return kind==='slides'?slidesFromText(text,name):planFromText(text,body.count,name);
+  }finally{clearInterval(timer);clearTimeout(kill)}
+}
+function slidesFromText(text,name){
+  text=text.replace(/^\s*```[a-z]*\s*|\s*```\s*$/g,'');
+  const [markup,caption='']=text.split(/^\s*-{3}CAPTION-{3}\s*$/m);
+  if(!/^#\s*\S/m.test(markup||''))throw new ApiError(502,name+' вернул неожиданный ответ — попробуйте ещё раз');
+  return {markup:markup.slice(0,15000),caption:caption.trim().slice(0,1500)};
+}
+function planFromText(text,count,name){
+  const m=text.match(/\{[\s\S]*\}/);let plan;
+  try{plan=JSON.parse(m[0])}catch{throw new ApiError(502,name+' вернул неожиданный ответ — попробуйте ещё раз')}
+  const prompts=(Array.isArray(plan.prompts)?plan.prompts:[]).map(p=>String(p).slice(0,1200)).filter(Boolean);
+  if(!prompts.length)throw new ApiError(502,name+' не составил промпты');
+  while(prompts.length<count)prompts.push(prompts[prompts.length%prompts.length]);
+  return {prompts:prompts.slice(0,count),caption:String(plan.caption||'').slice(0,1000)};
+}
 // Переключатель нейросети виден, только если на сервере подключено больше одной
 function syncAi(){
   const list=(me&&me.ai)||['claude'],pick=$('aiPick');pick.hidden=!(accessKey&&me&&list.length>1);
@@ -342,7 +387,7 @@ async function generate(){
   if(me.remaining<count){$('status').textContent='На сегодня осталось генераций: '+me.remaining+'. Выберите меньше вариантов.';return}
   $('generate').disabled=true;$('status').textContent='Подбираем картинки под ваш текст…';
   let plan;
-  try{plan=await api('/api/plan',{ai:$('ai').value,brief:$('brief').value,headline:$('headline').value,template:$('template').value,format:$('format').value,count})}
+  try{plan=await aiCall('/api/plan',{ai:$('ai').value,brief:$('brief').value,headline:$('headline').value,template:$('template').value,format:$('format').value,count},'Подбираем картинки под текст','plan')}
   catch(e){$('status').textContent='✕ '+e.message;$('generate').disabled=false;return}
   postCaption=plan.caption||'';showCaption();
   tiles=plan.prompts.map((p,i)=>makeTile(i,p));updateStatus();
@@ -418,7 +463,7 @@ async function carGenerate(){
   }
   $('cGenerate').disabled=true;$('cFixBtn').disabled=true;car.err='';$('status').textContent='Раскладываем бриф на слайды…';
   let res;
-  try{res=await api('/api/slides',{ai:$('ai').value,brief:$('cBrief').value,title:$('cTitle').value,slides:Number($('cSlides').value)})}
+  try{res=await aiCall('/api/slides',{ai:$('ai').value,brief:$('cBrief').value,title:$('cTitle').value,slides:Number($('cSlides').value)},'Раскладываем бриф на слайды','slides')}
   catch(e){car.err='✕ '+e.message;carStatus();$('cGenerate').disabled=false;$('cFixBtn').disabled=false;return}
   $('cMarkup').value=res.markup.trim();try{localStorage.setItem(CAR_STORE,$('cMarkup').value)}catch{}
   car.caption=res.caption||'';showCaption();car.sample=false;car.images=[];
@@ -433,7 +478,7 @@ async function carFix(){
   const instruction=$('cFix').value.trim();if(!instruction){$('cFix').focus();return}
   $('cFixBtn').disabled=true;$('cGenerate').disabled=true;car.err='';$('status').textContent='Правим карусель…';
   let res;
-  try{res=await api('/api/slides',{ai:$('ai').value,instruction,markup:$('cMarkup').value,brief:$('cBrief').value})}
+  try{res=await aiCall('/api/slides',{ai:$('ai').value,instruction,markup:$('cMarkup').value,brief:$('cBrief').value},'Правим карусель','slides')}
   catch(e){car.err='✕ '+e.message;$('cFixBtn').disabled=false;carStatus();return}
   const old=car.slides,oldImgs=car.images,hadAi=oldImgs.some(Boolean);
   $('cMarkup').value=res.markup.trim();try{localStorage.setItem(CAR_STORE,$('cMarkup').value)}catch{}

@@ -17,6 +17,8 @@
     "CLAUDE_MODEL": "claude-sonnet-5-5",
     // Модель Kimi (Moonshot) — работает, если задан секрет MOONSHOT_API_KEY
     "KIMI_MODEL": "kimi-k3.1-pro",
+    // Сколько Kimi «думает»: low — быстро, high / max — дольше и дороже
+    "KIMI_REASONING": "low",
     "KREA_MODEL": "google/nano-banana-pro",
     "KREA_RESOLUTION": "1K",
     // Референсы стиля для Krea (рендеры из Figma, лежат в GitHub Pages): обложки и 3D-иллюстрации

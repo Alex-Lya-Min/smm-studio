@@ -161,6 +161,33 @@ async function llm(env, ai, system, user, maxTokens) {
   return ai === "kimi" ? kimi(env, system, user, maxTokens) : claude(env, system, user, maxTokens);
 }
 
+// Kimi думает долго, поэтому его ответ отдаём в браузер потоком как есть (SSE): студия видит прогресс,
+// а Worker почти не тратит процессорное время. Ошибки до начала потока возвращаем обычным JSON.
+async function kimiStream(env, system, user, maxTokens) {
+  const r = await fetch(`${env.KIMI_API_BASE || "https://api.moonshot.ai"}/v1/chat/completions`, {
+    method: "POST",
+    headers: { authorization: `Bearer ${env.MOONSHOT_API_KEY}`, "content-type": "application/json" },
+    body: JSON.stringify({
+      model: env.KIMI_MODEL || "kimi-k3.1-pro",
+      reasoning_effort: env.KIMI_REASONING || "low",
+      max_completion_tokens: maxTokens * 4,
+      stream: true,
+      messages: [
+        { role: "system", content: system },
+        { role: "user", content: user },
+      ],
+    }),
+  });
+  if (!r.ok || !r.body) {
+    const why = await upstreamReason(r);
+    console.error("kimi", r.status, why);
+    throw new HttpError(502, `Kimi ответил ошибкой ${r.status}: ${why}`);
+  }
+  return new Response(r.body, {
+    headers: { "content-type": "text/event-stream; charset=utf-8", "cache-control": "no-store", "x-ai-stream": "kimi" },
+  });
+}
+
 // Kimi: OpenAI-совместимый Chat Completions на api.moonshot.ai
 async function kimi(env, system, user, maxTokens) {
   const r = await fetch(`${env.KIMI_API_BASE || "https://api.moonshot.ai"}/v1/chat/completions`, {
@@ -168,6 +195,7 @@ async function kimi(env, system, user, maxTokens) {
     headers: { authorization: `Bearer ${env.MOONSHOT_API_KEY}`, "content-type": "application/json" },
     body: JSON.stringify({
       model: env.KIMI_MODEL || "kimi-k3.1-pro",
+      reasoning_effort: env.KIMI_REASONING || "low",
       // Модели K3 сначала «думают», и эти токены тоже идут в лимит ответа — даём запас
       max_completion_tokens: maxTokens * 4,
       messages: [
@@ -210,16 +238,19 @@ async function claude(env, system, user, maxTokens) {
   return (data.content || []).filter((b) => b.type === "text").map((b) => b.text).join("");
 }
 
-async function claudePlan(env, input) {
-  const name = AI_NAMES[input.ai];
-  const user = [
+function planUser(input) {
+  return [
     `N: ${input.count}`,
     `Format: ${input.format}`,
     `Composition type: ${input.template}`,
     `Headline on the image: ${input.headline || "(none)"}`,
     `Brief:\n${input.brief || "(empty)"}`,
   ].join("\n");
-  const text = await llm(env, input.ai, PLAN_SYSTEM, user, 1500);
+}
+
+async function claudePlan(env, input) {
+  const name = AI_NAMES[input.ai];
+  const text = await llm(env, input.ai, PLAN_SYSTEM, planUser(input), 1500);
   const m = text.match(/\{[\s\S]*\}/);
   if (!m) throw new HttpError(502, `${name} вернул неожиданный ответ — попробуйте ещё раз`);
   const plan = JSON.parse(m[0]);
@@ -329,8 +360,8 @@ ${CAROUSEL_EXAMPLE}
 ---CAPTION---
 Solar AI Firewall помогает компаниям безопасно работать с нейросетями: правила для сотрудников, маскирование данных и защита от подмены инструкций. #ИИ #кибербезопасность`;
 
-async function claudeSlides(env, input) {
-  const user = input.instruction
+function slidesUser(input) {
+  return input.instruction
     ? [
         "Here is the current carousel markup. Change it according to the editor's request and keep everything else",
         "exactly as it is (same slides, wording and @art prompts unless the request is about them).",
@@ -345,7 +376,10 @@ async function claudeSlides(env, input) {
         input.title ? `Product or topic for the cover: ${input.title}` : "",
         `Brief:\n${input.brief}`,
       ].filter(Boolean).join("\n");
-  const text = (await llm(env, input.ai, SLIDES_SYSTEM, user, 4500)).replace(/^\s*```[a-z]*\s*|\s*```\s*$/g, "");
+}
+
+async function claudeSlides(env, input) {
+  const text = (await llm(env, input.ai, SLIDES_SYSTEM, slidesUser(input), 4500)).replace(/^\s*```[a-z]*\s*|\s*```\s*$/g, "");
   const [markup, caption = ""] = text.split(/^\s*-{3}CAPTION-{3}\s*$/m);
   if (!/^#\s*\S/m.test(markup || "")) throw new HttpError(502, `${AI_NAMES[input.ai]} вернул неожиданный ответ — попробуйте ещё раз`);
   return { markup: clip(markup, 15000), caption: clip(caption, 1500) };
@@ -459,6 +493,7 @@ async function route(request, env) {
       brief: clip(body.brief, 2000),
       ai: pickAi(env, body.ai),
     };
+    if (input.ai === "kimi") return kimiStream(env, PLAN_SYSTEM, planUser(input), 1500);
     const plan = await claudePlan(env, input);
     return json({ prompts: plan.prompts, caption: plan.caption });
   }
@@ -473,15 +508,16 @@ async function route(request, env) {
     const quota = await me.consume("plan", day, user.limit * 3);
     if (!quota.ok) throw new HttpError(429, "На сегодня лимит запросов исчерпан");
     const n = Number(body.slides) || 0;
-    const result = await claudeSlides(env, {
+    const input = {
       brief,
       title: clip(body.title, 120),
       slides: n ? Math.min(10, Math.max(3, n)) : 0,
       instruction,
       markup,
       ai: pickAi(env, body.ai),
-    });
-    return json(result);
+    };
+    if (input.ai === "kimi") return kimiStream(env, SLIDES_SYSTEM, slidesUser(input), 4500);
+    return json(await claudeSlides(env, input));
   }
 
   if (path === "/api/background" && request.method === "POST") {
