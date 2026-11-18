@@ -1,0 +1,17 @@
+{
+  // Ретранслятор вебхуков Kaiten → GitHub Actions (робот в репозитории kaiten-automation).
+  // Деплоится из .github/workflows/deploy-kaiten-hook.yml.
+  "name": "kaiten-hook",
+  "main": "src/index.js",
+  "compatibility_date": "2025-09-01",
+  "workers_dev": true,
+  "preview_urls": false,
+  "observability": { "enabled": true },
+  "vars": {
+    // Колонка «Очередь» на доске робота: будим робота, только когда карточка попала в неё
+    "QUEUE_COLUMN_ID": "6821622",
+    // Репозиторий робота и тип события для repository_dispatch (см. robot.yml)
+    "GITHUB_REPO": "Alex-Lya-Min/kaiten-automation",
+    "DISPATCH_TYPE": "kaiten"
+  }
+}
