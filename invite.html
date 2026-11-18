@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="robots" content="noindex">
+<title>SMM Studio — приглашение</title>
+<!-- Служебная страница: робот Kaiten рисует здесь приглашения и сохраняет их в PDF (макеты «PDF Материалы» в Figma). -->
+<style>
+@font-face{font-family:"ONY One Beta";src:local("ONY One Beta"),url(fonts/ony/ONYOne-Regular.woff2) format("woff2"),url(fonts/ony/ONYOne-Regular.woff) format("woff");font-weight:400;font-display:block}
+@font-face{font-family:"ONY One Beta";src:local("ONY One Beta Medium"),url(fonts/ony/ONYOne-Medium.woff2) format("woff2"),url(fonts/ony/ONYOne-Medium.woff) format("woff");font-weight:500;font-display:block}
+@font-face{font-family:"Golos Text";src:url(fonts/fallback/golos-text-cyrillic-400-normal.woff2) format("woff2");font-weight:400;unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:"Golos Text";src:url(fonts/fallback/golos-text-latin-400-normal.woff2) format("woff2");font-weight:400;unicode-range:U+0000-00FF,U+2000-206F}
+@font-face{font-family:"Golos Text";src:url(fonts/fallback/golos-text-cyrillic-500-normal.woff2) format("woff2");font-weight:500;unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:"Golos Text";src:url(fonts/fallback/golos-text-latin-500-normal.woff2) format("woff2");font-weight:500;unicode-range:U+0000-00FF,U+2000-206F}
+@font-face{font-family:"PT Serif";src:url(fonts/serif/pt-serif-cyrillic-400-normal.woff2) format("woff2");font-weight:400;size-adjust:106%;unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:"PT Serif";src:url(fonts/serif/pt-serif-latin-400-normal.woff2) format("woff2");font-weight:400;size-adjust:106%;unicode-range:U+0000-00FF,U+2000-206F}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{width:1920px;font:400 40px/1.2 "ONY One Beta","Golos Text",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.inv{--bg:#1b1e23;--ink:#fff;--card:#24282e;--line:rgba(255,255,255,.1);--accent:#fe6e36;--pill:#fe6e36;--pillInk:#fff;--chip:#0f1f2b;--bg0:rgba(27,30,35,0);
+  width:1920px;background:var(--bg);color:var(--ink);position:relative;overflow:hidden}
+.inv.light{--bg:#f1edeb;--bg0:rgba(241,237,235,0);--ink:#0f1f2b;--card:rgba(255,255,255,.55);--line:#0f1f2b;--pill:#fff;--pillInk:#0f1f2b}
+b,strong{font-weight:500}
+/* шапка */
+.hero{position:relative;height:1040px;padding:120px 120px 118px;display:flex;flex-direction:column;justify-content:space-between;color:#fff}
+.hero .ph{position:absolute;inset:0;background:#2a2d33 center/cover no-repeat}
+.hero::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(15,18,22,.82) 0%,rgba(15,18,22,.55) 38%,rgba(15,18,22,0) 68%)}
+.hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:46%;background:linear-gradient(180deg,var(--bg0),var(--bg))}
+.light .hero::after{height:12%}
+.hero>*{position:relative;z-index:2}
+.hero>.ph{position:absolute;z-index:0}
+.hero::before,.hero::after{z-index:1}
+.logo{width:276px;height:52px;display:block}
+.eyebrow{font-size:30px;text-transform:uppercase;letter-spacing:.02em;margin:0 0 40px}
+.title{font-size:100px;font-weight:500;line-height:1.02;margin:0;max-width:1000px}
+.datepill{display:inline-flex;align-items:center;height:98px;padding:0 70px;border-radius:49px;background:var(--pill);color:var(--pillInk);
+  font-size:50px;font-weight:500;text-transform:uppercase;margin-top:58px;white-space:nowrap}
+.venue{font-size:35px;margin-top:50px}
+/* тело */
+.body{position:relative;padding:120px 120px 0}
+.light .body::before{content:"";position:absolute;left:0;right:0;top:0;height:1500px;background:var(--hero) center top/cover no-repeat;
+  opacity:.16;filter:grayscale(1) contrast(1.1);-webkit-mask:linear-gradient(180deg,transparent 0,#000 18%,transparent 100%);mask:linear-gradient(180deg,transparent 0,#000 18%,transparent 100%)}
+.body>*{position:relative}
+.greet{font-size:60px;margin:0 0 70px}
+.p{margin:0 0 37px;max-width:1600px}
+.cards{display:grid;gap:30px;margin-top:54px}
+.row{display:grid;gap:30px}
+.card{border-radius:30px;background:var(--card);padding:47px 65px 52px}
+.light .card{border:1px solid var(--line);background:rgba(255,255,255,.35)}
+.card.accent{background:var(--accent);color:#fff;border:0}
+.card .k{font-weight:500}
+.card .v{margin-top:16px}
+.list{list-style:none;margin:16px 0 0;padding:0}
+.list li{position:relative;padding-left:40px;line-height:47px}
+.list li::before{content:"";position:absolute;left:2px;top:17px;width:14px;height:14px;border-radius:50%;background:var(--accent)}
+.note{font-size:24px;margin-top:24px}
+.confirm{display:flex;align-items:center;justify-content:space-between;gap:40px}
+.confirm.img{position:relative;overflow:hidden;color:#fff;border:0;background:#0f1f2b}
+.confirm.img::before{content:"";position:absolute;inset:0;background:var(--hero) center 35%/cover no-repeat;opacity:.55}
+.confirm.img::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(15,31,43,.85),rgba(15,31,43,.35))}
+.confirm>*{position:relative;z-index:1}
+.btn{display:inline-flex;align-items:center;justify-content:center;height:77px;min-width:540px;padding:0 60px;border-radius:150px;background:#fff;color:#0f1f2b;
+  text-decoration:none;white-space:nowrap;flex:none}
+.accent .btn{color:var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:24px;margin-top:40px}
+.chip{display:inline-flex;align-items:center;height:77px;padding:0 95px;border-radius:150px;background:var(--chip);color:#fff;text-decoration:none;white-space:nowrap}
+.dark .chip{background:var(--accent)}
+.foot{display:flex;justify-content:space-between;gap:40px;font-size:25px;padding:50px 120px 120px}
+a{color:inherit}
+</style></head><body>
+<div id="root"></div>
+<script>
+(() => {
+  const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  // **жирный**, переносы строк и неразрывные пробелы после коротких слов
+  const SHORT = /(^|[\s(«"])([аАвВиИкКоОсСуУяЯ]|на|На|не|Не|по|По|до|До|из|Из|за|За|от|От|об|Об|во|Во|со|Со|для|Для|при|При) /g;
+  const rich = (s) => esc(String(s ?? '').replace(SHORT, '$1$2\u00a0').replace(SHORT, '$1$2\u00a0').replace(/ ([—–])/g, '\u00a0$1'))
+    .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
+  const safeUrl = (u) => /^(https?:|mailto:|tel:)/i.test(String(u || '').trim()) ? String(u).trim() : '';
+  const link = (text, url, cls) => { const u = safeUrl(url); return u ? `<a class="${cls}" href="${esc(u)}">${rich(text)}</a>` : `<span class="${cls}">${rich(text)}</span>`; };
+  let logoSvg = '';
+  const logoReady = fetch('assets/solar-logo.svg').then((r) => r.text()).then((t) => { logoSvg = t; }).catch(() => {});
+
+  // renderInvite(data, heroDataUrl) → { height } — data собирает Claude из карточки Kaiten
+  window.renderInvite = async (d, hero) => {
+    await logoReady;
+    await Promise.all(['400 40px "ONY One Beta"', '500 40px "ONY One Beta"', '400 40px "Golos Text"'].map((f) => document.fonts.load(f))).catch(() => {});
+    const light = d.theme === 'light';
+    const logo = logoSvg.replace(/fill="#?[0-9A-Fa-f]{3,6}"/g, `fill="${light ? '#ffffff' : '#FE6E36'}"`).replace('<svg', '<svg class="logo"');
+    const h = [];
+    h.push(`<div class="inv ${light ? 'light' : 'dark'}" style="--hero:url('${hero || ''}')">`);
+    h.push(`<section class="hero"><div class="ph" style="background-image:url('${hero || ''}')"></div>${logo}<div>`);
+    if (d.eyebrow) h.push(`<p class="eyebrow">${rich(d.eyebrow)}</p>`);
+    h.push(`<h1 class="title">${rich(d.title)}</h1>`);
+    if (d.date_label) h.push(`<div class="datepill">${rich(d.date_label)}</div>`);
+    if (d.venue && d.venue.length) h.push(`<div class="venue">${d.venue.map(rich).join('<br>')}</div>`);
+    h.push('</div></section><section class="body">');
+    if (d.greeting) h.push(`<p class="greet">${rich(d.greeting)}</p>`);
+    (d.paragraphs || []).forEach((p) => h.push(`<p class="p">${rich(p)}</p>`));
+    h.push('<div class="cards">');
+    const facts = (d.facts || []).filter((f) => f && f.label && f.value);
+    for (let i = 0; i < facts.length; i += 3) {
+      const part = facts.slice(i, i + 3);
+      h.push(`<div class="row" style="grid-template-columns:repeat(${part.length},1fr)">` + part.map((f) => `<div class="card"><div class="k">${rich(f.label)}</div><div class="v">${rich(f.value)}</div></div>`).join('') + '</div>');
+    }
+    const places = (d.places || []).filter((f) => f && f.label && f.value);
+    if (places.length) h.push(`<div class="row" style="grid-template-columns:repeat(${Math.min(places.length, 2)},1fr)">` + places.map((f) => `<div class="card accent"><div class="k">${rich(f.label)}</div><div class="v">${rich(f.value)}</div></div>`).join('') + '</div>');
+    if (d.program && (d.program.items || []).length) h.push(`<div class="card"><div class="k">${rich(d.program.title || 'В программе:')}</div><ul class="list">${d.program.items.map((x) => `<li>${rich(x)}</li>`).join('')}</ul></div>`);
+    const c = d.confirm;
+    if (c && (c.title || c.text)) {
+      const btn = c.button && c.button.text ? link(c.button.text, c.button.url, 'btn') : '';
+      h.push(`<div class="card confirm ${light ? 'img' : 'accent'}"><div><div class="k">${rich(c.title || 'Подтверждение участия')}</div>${c.text ? `<div class="v">${rich(c.text)}</div>` : ''}${c.note ? `<div class="note">${rich(c.note)}</div>` : ''}</div>${btn}</div>`);
+    }
+    const k = d.contacts;
+    if (k && (k.text || (k.items || []).length)) {
+      h.push(`<div class="card"><div class="k">${rich(k.title || 'Организационные вопросы')}</div>${k.text ? `<div class="v">${rich(k.text)}</div>` : ''}`);
+      if ((k.items || []).length) h.push(`<div class="chips">${k.items.map((x) => link(x.text, x.url, 'chip')).join('')}</div>`);
+      h.push('</div>');
+    }
+    h.push('</div></section>');
+    h.push(`<footer class="foot"><span>${rich(d.footer || '')}</span><span>${rich(d.year || '')}</span></footer></div>`);
+    document.getElementById('root').innerHTML = h.join('');
+    if (hero) await new Promise((ok) => { const i = new Image(); i.onload = i.onerror = ok; i.src = hero; });
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    return { height: Math.ceil(document.querySelector('.inv').getBoundingClientRect().height) };
+  };
+  window.inviteReady = true;
+})();
+</script>
+</body></html>
