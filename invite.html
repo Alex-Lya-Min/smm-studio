@@ -79,7 +79,17 @@ a{color:inherit}
   const logoReady = fetch('assets/solar-logo.svg').then((r) => r.text()).then((t) => { logoSvg = t; }).catch(() => {});
 
   // renderInvite(data, heroDataUrl) → { height } — data собирает Claude из карточки Kaiten
+  // Фото шапки ужимаем до 2400 px JPEG: PDF и превью остаются лёгкими, в печати разницы не видно
+  const shrink = (src) => new Promise((ok) => {
+    if (!src) return ok('');
+    const i = new Image();
+    i.onload = () => { const k = Math.min(1, 2400 / i.naturalWidth), c = document.createElement('canvas');
+      c.width = Math.round(i.naturalWidth * k); c.height = Math.round(i.naturalHeight * k);
+      c.getContext('2d').drawImage(i, 0, 0, c.width, c.height); ok(c.toDataURL('image/jpeg', 0.86)); };
+    i.onerror = () => ok(src); i.src = src;
+  });
   window.renderInvite = async (d, hero) => {
+    hero = await shrink(hero);
     await logoReady;
     await Promise.all(['400 40px "ONY One Beta"', '500 40px "ONY One Beta"', '400 40px "Golos Text"'].map((f) => document.fonts.load(f))).catch(() => {});
     const light = d.theme === 'light';
