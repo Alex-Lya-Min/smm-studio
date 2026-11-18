@@ -423,6 +423,8 @@
       for (const it of L.items) BLOCKS[it.b.type].draw(c, it.b, it, M, it.y, k, snap);
     }
     if (opt.busy || opt.error) badge(c, opt.error || opt.busy, !!opt.error);
+    // overflow — текст не влез даже в самом мелком кегле
+    return { k, overflow: L.free < 0 };
   }
   function badge(c, text, err) {
     c.save(); c.font = '500 26px ' + SANS;
